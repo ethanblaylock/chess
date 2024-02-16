@@ -1,6 +1,10 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
+import chess.moves.*;
 
 /**
  * Represents a single chess piece
@@ -10,7 +14,28 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    private ChessGame.TeamColor pieceColor;
+    private PieceType type;
+    private boolean notMoved;
+    private boolean justDoubleMoved;
+
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+        notMoved = true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type);
     }
 
     /**
@@ -29,14 +54,42 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return this.pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return this.type;
+    }
+
+    /**
+     * Indicates that a piece has been moved from its initial position
+     */
+    public void setNotMoved() {
+        notMoved = false;
+    }
+
+    /**
+     * @return Whether or not a piece has been moved from its initial position
+     */
+    public boolean getNotMoved() {
+        return notMoved;
+    }
+
+    /**
+     * Indicates that a piece has just been double moved from its initial position
+     */
+    public void setJustDoubleMoved(boolean bool) {
+        justDoubleMoved = bool;
+    }
+
+    /**
+     * @return Whether or not a piece has just been double moved from its initial position
+     */
+    public boolean getJustDoubleMoved() {
+        return justDoubleMoved;
     }
 
     /**
@@ -47,6 +100,28 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> possibleMoves = new HashSet<>();
+
+        switch (board.getPiece(myPosition).getPieceType()) {
+            case BISHOP:
+                possibleMoves.addAll(Bishop.pieceMoves(board, myPosition));
+                break;
+            case ROOK:
+                possibleMoves.addAll(Rook.pieceMoves(board, myPosition));
+                break;
+            case KNIGHT:
+                possibleMoves.addAll(Knight.pieceMoves(board, myPosition));
+                break;
+            case KING:
+                possibleMoves.addAll(King.pieceMoves(board, myPosition));
+                break;
+            case QUEEN:
+                possibleMoves.addAll(Queen.pieceMoves(board, myPosition));
+                break;
+            case PAWN:
+                possibleMoves.addAll(Pawn.pieceMoves(board, myPosition));
+                break;
+        }
+        return possibleMoves;
     }
 }
