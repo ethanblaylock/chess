@@ -6,4 +6,4 @@ package model;
  * @param password the user's password corresponding to the username
  * @param email the user's email
  */
-record UserData(String username, String password, String email) {}
+public record UserData(String username, String password, String email) {}

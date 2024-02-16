@@ -10,4 +10,4 @@ import chess.ChessGame;
  * @param gameName the name pertaining to the game
  * @param game a ChessGame object containing the specific game info
  */
-record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {}
+public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {}
