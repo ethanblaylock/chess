@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class AuthDAO {
-    private Collection<AuthData> data = new HashSet<>();
+    private static Collection<AuthData> data = new HashSet<>();
 
     /**
      * Create an authorization for a username
@@ -16,7 +16,7 @@ public class AuthDAO {
      * @return A AuthData object with a unique authToken
      * @throws DataAccessException if Username is already being used for another authorization
      */
-    AuthData createAuth(String username) throws DataAccessException {
+    public static AuthData createAuth(String username) throws DataAccessException {
         for (AuthData auth : data) {
             if (Objects.equals(auth.username(), username)) {
                 throw new DataAccessException("Username is already associated with an authToken");
@@ -33,7 +33,7 @@ public class AuthDAO {
      * @param authToken the authToken that is authorized
      * @return the authorization associated with the authToken or null
      */
-    AuthData getAuth(String authToken) {
+    public static AuthData getAuth(String authToken) {
         for (AuthData auth : data) {
             if (Objects.equals(auth.authToken(), authToken)) {
                 return auth;
@@ -47,7 +47,7 @@ public class AuthDAO {
      * @param authData specifies which authorization is to be deleted
      * @throws DataAccessException if the authToken is invalid
      */
-    void deleteAuth(AuthData authData) throws DataAccessException {
+    public static void deleteAuth(AuthData authData) throws DataAccessException {
         if (getAuth(authData.authToken()) != null) {
             data.remove(getAuth(authData.authToken()));
         } else {
@@ -58,7 +58,13 @@ public class AuthDAO {
     /**
      * Clears all the current authorizations
      */
-    void clear() { data.clear(); }
+    public static void clear() { data.clear(); }
+
+    /**
+     * Retrieves all the data
+     * @return a Collection with all the data
+     */
+    public static Collection<AuthData> getData() { return data; }
 
 
 
