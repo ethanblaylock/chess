@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class UserDAO {
-    private static Collection<UserData> data = new HashSet<>();
+    private static final Collection<UserData> data = new HashSet<>();
 
     /**
      * Creates a user given a UserData object

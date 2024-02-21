@@ -4,18 +4,20 @@ import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.AuthData;
-import model.UserData;
+import request.LoginRequest;
+import result.RegisterResult;
 
 import java.util.Objects;
 
 public class LoginService {
-    public static AuthData login(UserData userData) throws DataAccessException {
-        if (UserDAO.getUser(userData.username()) == null) {
+    public static RegisterResult login(LoginRequest loginRequest) throws DataAccessException {
+        if (UserDAO.getUser(loginRequest.username()) == null) {
             throw new DataAccessException("User not registered");
         }
-        else if (!Objects.equals(Objects.requireNonNull(UserDAO.getUser(userData.username())).password(), userData.password())) {
+        else if (!Objects.equals(Objects.requireNonNull(UserDAO.getUser(loginRequest.username())).password(), loginRequest.password())) {
             throw new DataAccessException("Wrong Password");
         }
-        return AuthDAO.createAuth(userData.username());
+        AuthData authData = AuthDAO.createAuth(loginRequest.username());
+        return new RegisterResult(loginRequest.username(), authData.authToken());
     }
 }

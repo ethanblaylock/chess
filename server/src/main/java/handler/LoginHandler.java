@@ -2,8 +2,7 @@ package handler;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
-import model.AuthData;
-import model.UserData;
+import request.LoginRequest;
 import service.LoginService;
 import spark.Request;
 import spark.Response;
@@ -13,16 +12,15 @@ import spark.Response;
 public class LoginHandler {
     public static Object handleRequest(Request req, Response res) {
         Gson serializer = new Gson();
-        UserData userData = serializer.fromJson(req.body(), UserData.class);
+        LoginRequest loginRequest = serializer.fromJson(req.body(), LoginRequest.class);
 
         try {
-            if (userData.username() == null || userData.password() == null) {
+            if (loginRequest.username() == null || loginRequest.password() == null) {
                 res.status(400);
                 res.body(new DataAccessException("Bad Request").toJson());
                 return res.body();
             }
-            AuthData authData = LoginService.login(userData);
-            String authJson = serializer.toJson(authData);
+            String authJson = serializer.toJson(LoginService.login(loginRequest));
             res.body(authJson);
             res.status(200);
         } catch (DataAccessException error) {

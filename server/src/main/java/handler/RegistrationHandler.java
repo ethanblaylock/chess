@@ -2,27 +2,26 @@ package handler;
 
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
-import model.AuthData;
-import model.UserData;
+import request.RegisterRequest;
+import result.RegisterResult;
 import service.RegistrationService;
 import spark.Request;
 import spark.Response;
 
-import java.util.Objects;
 
 public class RegistrationHandler {
     public static Object handleRequest(Request req, Response res) {
         Gson serializer = new Gson();
-        UserData userData = serializer.fromJson(req.body(), UserData.class);
+        RegisterRequest registerRequest = serializer.fromJson(req.body(), RegisterRequest.class);
 
         try {
-            if (userData.username() == null || userData.password() == null || userData.email() == null) {
+            if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
                 res.status(400);
                 res.body(new DataAccessException("Bad Request").toJson());
                 return res.body();
             }
-            AuthData authData = RegistrationService.register(userData);
-            String authJson = serializer.toJson(authData);
+            RegisterResult registerResult = RegistrationService.register(registerRequest);
+            String authJson = serializer.toJson(registerResult);
             res.body(authJson);
             res.status(200);
         } catch (DataAccessException error) {

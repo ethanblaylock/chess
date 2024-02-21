@@ -8,16 +8,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class AuthDAO {
-    private static Collection<AuthData> data = new HashSet<>();
+    private static final Collection<AuthData> data = new HashSet<>();
 
     /**
      * Create an authorization for a username
      * @param username a username to be associated with the authorization
      * @return A AuthData object with a unique authToken
-     * @throws DataAccessException if Username is already being used for another authorization
      */
-    public static AuthData createAuth(String username) throws DataAccessException {
-        data.removeIf(auth -> Objects.equals(auth.username(), username));
+    public static AuthData createAuth(String username) {
+        //data.removeIf(auth -> Objects.equals(auth.username(), username));
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, username);
         data.add(authData);

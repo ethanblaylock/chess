@@ -6,7 +6,7 @@ import model.GameData;
 import java.util.*;
 
 public class GameDAO {
-    private static Collection<GameData> data = new HashSet<>();
+    private static final Collection<GameData> data = new HashSet<>();
 
     /**
      * Create a gameData object and gameID
