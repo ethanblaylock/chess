@@ -10,6 +10,7 @@ public class ClearHandler {
     public static Object handleRequest(Request req, Response res) {
         ClearService.clearApplication();
         res.status(200);
-        return "{}";
+        res.body(req.body() + "{}");
+        return res.body();
     }
 }
