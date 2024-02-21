@@ -17,11 +17,7 @@ public class AuthDAO {
      * @throws DataAccessException if Username is already being used for another authorization
      */
     public static AuthData createAuth(String username) throws DataAccessException {
-        for (AuthData auth : data) {
-            if (Objects.equals(auth.username(), username)) {
-                throw new DataAccessException("Username is already associated with an authToken");
-            }
-        }
+        data.removeIf(auth -> Objects.equals(auth.username(), username));
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, username);
         data.add(authData);
