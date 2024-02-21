@@ -15,10 +15,8 @@ public class UserDAO {
      * @throws DataAccessException throws exception if username is taken
      */
     public static void createUser(UserData userData) throws DataAccessException {
-        for (UserData user : data) {
-            if (Objects.equals(user.username(), userData.username())) {
-                throw new DataAccessException("Username already exists");
-            }
+        if (getUser(userData.username()) != null) {
+            throw new DataAccessException("Username already exists");
         }
         data.add(userData);
     }
