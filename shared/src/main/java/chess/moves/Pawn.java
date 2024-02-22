@@ -41,10 +41,7 @@ public class Pawn {
         if (teamColor == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
             return true;
         }
-        else if (teamColor == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1){
-            return true;
-        }
-        return false;
+        else return teamColor == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1;
     }
 
     /**
@@ -102,14 +99,12 @@ public class Pawn {
         } else {
             return possibleMoves;
         }
+        int requiredRow = switch (teamColor) {
+            case WHITE -> 2;
+            case BLACK -> 7;
+        };
         /* These check if pawn is on starting line, allowing it to move two spaces */
-        if (teamColor == ChessGame.TeamColor.WHITE && position.getRow() == 2) {
-            ChessPosition newDir2 = new ChessPosition(position.getRow() + 2*movementDir, position.getColumn());
-            if (board.getPiece(newDir2) == null) {
-                possibleMoves.add(new ChessMove(position, newDir2, null));
-            }
-        }
-        else if (teamColor == ChessGame.TeamColor.BLACK && position.getRow() == 7) {
+        if (position.getRow() == requiredRow) {
             ChessPosition newDir2 = new ChessPosition(position.getRow() + 2*movementDir, position.getColumn());
             if (board.getPiece(newDir2) == null) {
                 possibleMoves.add(new ChessMove(position, newDir2, null));

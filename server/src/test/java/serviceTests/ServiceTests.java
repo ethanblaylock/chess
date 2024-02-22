@@ -29,11 +29,27 @@ public class ServiceTests {
     }
 
     @Test
-    @DisplayName("Clear the Application")
-    public void clearTest() throws DataAccessException {
+    @DisplayName("Clear the Application positive")
+    public void clearTestPositive() throws DataAccessException {
         UserDAO.createUser(new UserData("JimBob", "password", "ilovenarwals@g.com"));
         AuthDAO.createAuth("JimBob");
         GameDAO.createGame("i love chess");
+        ClearService.clearApplication();
+        Assertions.assertEquals(Collections.emptySet(), UserDAO.getData());
+        Assertions.assertEquals(Collections.emptySet(), AuthDAO.getData());
+        Assertions.assertEquals(Collections.emptySet(), GameDAO.getData());
+
+    }
+
+    @Test
+    @DisplayName("Clear the Application negative")
+    public void clearTestNegative() throws DataAccessException {
+        UserDAO.createUser(new UserData("JimBob", "password", "ilovenarwals@g.com"));
+        AuthDAO.createAuth("JimBob");
+        GameDAO.createGame("i love chess");
+        Assertions.assertNotEquals(Collections.emptySet(), UserDAO.getData());
+        Assertions.assertNotEquals(Collections.emptySet(), AuthDAO.getData());
+        Assertions.assertNotEquals(Collections.emptySet(), GameDAO.getData());
         ClearService.clearApplication();
         Assertions.assertEquals(Collections.emptySet(), UserDAO.getData());
         Assertions.assertEquals(Collections.emptySet(), AuthDAO.getData());
@@ -95,7 +111,7 @@ public class ServiceTests {
     }
 
     @Test
-    @DisplayName("Unauthorized")
+    @DisplayName("Logout without authorization")
     public void logoutTestNegative() throws DataAccessException {
         UserData userData = new UserData("JimBob", "password", "ilovenarwals@g.com");
         RegistrationService.register(new RegisterRequest(userData.username(), userData.password(), userData.email()));
@@ -135,7 +151,7 @@ public class ServiceTests {
     }
 
     @Test
-    @DisplayName("Unauthorized")
+    @DisplayName("create game not authorized")
     public void createGameTestNegative() throws DataAccessException {
         UserData userData = new UserData("JimBob", "password", "ilovenarwals@g.com");
         RegistrationService.register(new RegisterRequest(userData.username(), userData.password(), userData.email()));
