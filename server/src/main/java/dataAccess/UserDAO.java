@@ -1,5 +1,6 @@
 package dataAccess;
 
+import com.google.gson.Gson;
 import model.UserData;
 
 import java.util.Collection;
@@ -8,7 +9,8 @@ import java.util.Objects;
 
 public class UserDAO {
     private static final Collection<UserData> data = new HashSet<>();
-
+    private static final Gson serializer = new Gson();
+    private static final String tableName = "userData";
     /**
      * Creates a user given a UserData object
      * @param userData a UserData object to be inserted into the database
@@ -18,7 +20,11 @@ public class UserDAO {
         if (getUser(userData.username()) != null) {
             throw new DataAccessException("Username already exists");
         }
-        data.add(userData);
+        String userJson = serializer.toJson(userData);
+        DatabaseManager.createDatabase();
+        DatabaseManager.createTable(tableName);
+        DatabaseManager.truncateTable(tableName);
+        DatabaseManager.executeInsert(tableName, userJson);
     }
 
     /**

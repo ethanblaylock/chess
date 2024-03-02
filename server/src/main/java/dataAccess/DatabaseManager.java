@@ -15,7 +15,7 @@ public class DatabaseManager {
     static {
         try {
             try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
-                if (propStream == null) throw new Exception("Unable to laod db.properties");
+                if (propStream == null) throw new Exception("Unable to load db.properties");
                 Properties props = new Properties();
                 props.load(propStream);
                 databaseName = props.getProperty("db.name");
@@ -40,12 +40,49 @@ public class DatabaseManager {
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
+                conn.setCatalog(databaseName);
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
     }
 
+    static void createTable(String tableName) throws DataAccessException {
+        try {
+            var useStatement = "USE " + databaseName;
+            var statement = "CREATE TABLE IF NOT EXISTS " + tableName + " (notdata varchar(255))";
+            var conn = DriverManager.getConnection(connectionUrl, user, password);
+            try (var usePreparedStatement = conn.prepareStatement(useStatement)) {
+                usePreparedStatement.executeUpdate();
+            }
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    static void executeInsert(String tableName, String data) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO " + tableName + " VALUES(?)")) {
+                preparedStatement.setString(1, data);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    static void truncateTable(String tableName) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE " + tableName)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException((e.getMessage()));
+        }
+    }
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
