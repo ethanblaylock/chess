@@ -1,6 +1,10 @@
 package dataAccess;
 
+import model.UserData;
+
 import java.sql.*;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -34,7 +38,7 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    public static void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
@@ -47,10 +51,10 @@ public class DatabaseManager {
         }
     }
 
-    static void createTable(String tableName) throws DataAccessException {
+    public static void createTable(String tableName) throws DataAccessException {
         try {
             var useStatement = "USE " + databaseName;
-            var statement = "CREATE TABLE IF NOT EXISTS " + tableName + " (notdata varchar(255))";
+            var statement = "CREATE TABLE IF NOT EXISTS " + tableName + " (id int NOT NULL AUTO_INCREMENT, data mediumtext, PRIMARY KEY (id))";
             var conn = DriverManager.getConnection(connectionUrl, user, password);
             try (var usePreparedStatement = conn.prepareStatement(useStatement)) {
                 usePreparedStatement.executeUpdate();
@@ -65,7 +69,7 @@ public class DatabaseManager {
 
     static void executeInsert(String tableName, String data) throws DataAccessException {
         try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO " + tableName + " VALUES(?)")) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO " + tableName + " (data) VALUES(?)")) {
                 preparedStatement.setString(1, data);
                 preparedStatement.executeUpdate();
             }
@@ -74,7 +78,7 @@ public class DatabaseManager {
         }
     }
 
-    static void truncateTable(String tableName) throws DataAccessException {
+    public static void truncateTable(String tableName) throws DataAccessException {
         try (var conn = getConnection()) {
             try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE " + tableName)) {
                 preparedStatement.executeUpdate();
@@ -83,6 +87,54 @@ public class DatabaseManager {
             throw new DataAccessException((e.getMessage()));
         }
     }
+
+    public static void deleteData(String tableName, String data) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM " + tableName + " WHERE data = " + data)) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException((e.getMessage()));
+        }
+    }
+
+    public static int getTableSize(String tableName) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT data FROM " + tableName)) {
+                var rs = preparedStatement.executeQuery();
+                if (rs != null) {
+                    int size = 0;
+                    while (rs.next()) {
+                        size++;
+                    }
+                    return size;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException((e.getMessage()));
+        }
+    }
+
+    public static Collection<String> returnTable(String tableName) throws DataAccessException {
+        Collection<String> data = new HashSet<>();
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT data FROM " + tableName)) {
+                var rs = preparedStatement.executeQuery();
+                if (rs != null) {
+                    while (rs.next()) {
+                        data.add(rs.getString("data"));
+
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException((e.getMessage()));
+        }
+        return data;
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -102,6 +154,16 @@ public class DatabaseManager {
             return conn;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public static void dropDatabase() throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("DROP DATABASE chess")) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException((e.getMessage()));
         }
     }
 }
