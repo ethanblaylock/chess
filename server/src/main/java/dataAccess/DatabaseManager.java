@@ -22,6 +22,9 @@ public class DatabaseManager {
         DatabaseManager.createTable("userData");
         DatabaseManager.createTable("authData");
         DatabaseManager.createTable("gameData");
+        DatabaseManager.truncateTable("userData");
+        DatabaseManager.truncateTable("authData");
+        DatabaseManager.truncateTable("gameData");
     }
 
     /*
