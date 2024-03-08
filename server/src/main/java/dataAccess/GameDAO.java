@@ -7,8 +7,18 @@ import model.GameData;
 import java.util.*;
 
 public class GameDAO {
+
+    public GameDAO() throws DataAccessException {
+        configureDatabase();
+    }
+
     private static final Gson serializer = new Gson();
     private static final String tableName = "gameData";
+
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        DatabaseManager.createTable(tableName);
+    }
 
     /**
      * Create a gameData object and gameID

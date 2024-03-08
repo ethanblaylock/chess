@@ -9,8 +9,17 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class UserDAO {
+
+    public UserDAO() throws DataAccessException {
+        configureDatabase();
+    }
     private static final Gson serializer = new Gson();
     private static final String tableName = "userData";
+
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        DatabaseManager.createTable(tableName);
+    }
     /**
      * Creates a user given a UserData object
      * @param userData a UserData object to be inserted into the database

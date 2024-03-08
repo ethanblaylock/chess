@@ -9,9 +9,16 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class AuthDAO {
+    public AuthDAO() throws DataAccessException {
+        configureDatabase();
+    }
     private static final Gson serializer = new Gson();
     private static final String tableName = "authData";
 
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        DatabaseManager.createTable(tableName);
+    }
     /**
      * Create an authorization for a username
      * @param username a username to be associated with the authorization
