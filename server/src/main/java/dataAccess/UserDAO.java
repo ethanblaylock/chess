@@ -4,13 +4,11 @@ import com.google.gson.Gson;
 import model.UserData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
 public class UserDAO {
-    private static final Collection<UserData> data = new HashSet<>();
     private static final Gson serializer = new Gson();
     private static final String tableName = "userData";
     /**

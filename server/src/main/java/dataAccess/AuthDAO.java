@@ -2,7 +2,6 @@ package dataAccess;
 
 import com.google.gson.Gson;
 import model.AuthData;
-import model.UserData;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class AuthDAO {
-    private static final Collection<AuthData> data = new HashSet<>();
     private static final Gson serializer = new Gson();
     private static final String tableName = "authData";
 
@@ -24,7 +22,6 @@ public class AuthDAO {
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, username);
         String authJson = serializer.toJson(authData);
-        data.add(authData);
         DatabaseManager.createDatabase();
         DatabaseManager.createTable(tableName);
         DatabaseManager.executeInsert(tableName, authJson);
