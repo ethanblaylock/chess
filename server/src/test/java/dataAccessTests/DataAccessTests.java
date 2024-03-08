@@ -2,6 +2,7 @@ package dataAccessTests;
 
 import dataAccess.*;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -158,6 +159,35 @@ public class DataAccessTests {
     @DisplayName("No auth data")
     public void getAuthDataNegative() throws DataAccessException {
         Assertions.assertEquals(AuthDAO.getData(), Collections.emptySet());
+    }
+
+    @Test
+    @DisplayName("Create Game")
+    public void createGamePositive() throws DataAccessException {
+        GameDAO.createGame("test game");
+        Assertions.assertNotNull(GameDAO.getData());
+    }
+
+    @Test
+    @DisplayName("Create Game negative")
+    public void createGameNegative() throws DataAccessException {
+        GameDAO.createGame("test game");
+        Assertions.assertThrows(DataAccessException.class, () -> GameDAO.createGame("test game"));
+    }
+
+    @Test
+    @DisplayName("Get games")
+    public void getGameTestPositive() throws DataAccessException {
+        GameData actual = GameDAO.createGame("test game");
+        GameData obtained = GameDAO.getGame(actual.gameID());
+        Assertions.assertEquals(actual, obtained);
+    }
+
+    @Test
+    @DisplayName("No games")
+    public void getGameTestNegative() throws DataAccessException {
+        GameData gameData = GameDAO.getGame(1);
+        Assertions.assertNull(gameData);
     }
 
     @Test
