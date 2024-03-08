@@ -2,6 +2,7 @@ package handler;
 
 import dataAccess.DataAccessException;
 
+import org.springframework.security.core.parameters.P;
 import service.LogoutService;
 import spark.Request;
 import spark.Response;
@@ -24,6 +25,9 @@ public class LogoutHandler {
         } catch (DataAccessException error) {
             if (Objects.equals(error.getMessage(), "unauthorized")) {
                 res.status(401);
+                res.body(error.toJson());
+            } else {
+                res.status(500);
                 res.body(error.toJson());
             }
         }

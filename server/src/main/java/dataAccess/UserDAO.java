@@ -31,6 +31,12 @@ public class UserDAO {
         DatabaseManager.executeInsert(tableName, userJson);
     }
 
+    public static boolean checkPassword(String username, String password) throws DataAccessException {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String truePassword = Objects.requireNonNull(getUser(username)).password();
+        return encoder.matches(password, truePassword);
+    }
+
     /**
      * Finds the UserData object for a given username
      * @param username a username to find the data for

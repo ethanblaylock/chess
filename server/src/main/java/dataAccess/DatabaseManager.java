@@ -90,7 +90,17 @@ public class DatabaseManager {
 
     public static void deleteData(String tableName, String data) throws DataAccessException {
         try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("DELETE FROM " + tableName + " WHERE data = " + data)) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM " + tableName + " WHERE data = " + "'" + data + "'")) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException((e.getMessage()));
+        }
+    }
+
+    public static void updateGameData(String tableName, String data, String idNum) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("UPDATE " + tableName + " SET data = " + "'" + data + "'" + " WHERE id = " + idNum)) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {

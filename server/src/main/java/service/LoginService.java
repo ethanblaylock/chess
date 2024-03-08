@@ -14,7 +14,7 @@ public class LoginService {
         if (UserDAO.getUser(loginRequest.username()) == null) {
             throw new DataAccessException("User not registered");
         }
-        else if (!Objects.equals(Objects.requireNonNull(UserDAO.getUser(loginRequest.username())).password(), loginRequest.password())) {
+        else if (!UserDAO.checkPassword(loginRequest.username(), loginRequest.password())) {
             throw new DataAccessException("Wrong Password");
         }
         AuthData authData = AuthDAO.createAuth(loginRequest.username());

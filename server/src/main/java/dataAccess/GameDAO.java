@@ -54,14 +54,9 @@ public class GameDAO {
      * @throws DataAccessException if the new data corresponds to a game that does not exist
      */
     public static void updateGame(GameData gameData) throws DataAccessException {
-        try {
-            String gameJson = serializer.toJson(gameData);
-            DatabaseManager.deleteData(tableName, gameJson);
-        } catch(DataAccessException error) {
-            throw new DataAccessException("Tried to update a game that does not exist");
-        }
         String gameJson = serializer.toJson(gameData);
-        DatabaseManager.executeInsert(tableName, gameJson);
+        DatabaseManager.updateGameData(tableName, gameJson, String.valueOf(gameData.gameID()));
+        //DatabaseManager.executeInsert(tableName, gameJson);
         data.add(gameData);
     }
 
@@ -73,7 +68,7 @@ public class GameDAO {
     public static void deleteGame(GameData gameData) throws DataAccessException {
         if (getGame(gameData.gameID()) != null) {
             data.remove(getGame(gameData.gameID()));
-            String gameJson = serializer.toJson(gameData);
+            String gameJson = serializer.toJson(getGame(gameData.gameID()));
             DatabaseManager.deleteData(tableName, gameJson);
         } else {
             throw new DataAccessException("Tried to delete a game that does not exist");

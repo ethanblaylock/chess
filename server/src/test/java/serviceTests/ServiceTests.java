@@ -128,7 +128,6 @@ public class ServiceTests {
         GameData gameData = new GameData(1,null, null,"test game", Objects.requireNonNull(GameDAO.getGame(1)).game());
         testCollection.add(gameData);
         Assertions.assertEquals(testCollection, ListGamesService.listGames(authToken).games());
-
     }
 
     @Test
