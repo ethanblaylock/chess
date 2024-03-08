@@ -148,6 +148,19 @@ public class DataAccessTests {
     }
 
     @Test
+    @DisplayName("Get the auth Data")
+    public void getAuthDataPositive() throws DataAccessException {
+        AuthDAO.createAuth("JimBob");
+        Assertions.assertNotNull(AuthDAO.getData());
+    }
+
+    @Test
+    @DisplayName("No auth data")
+    public void getAuthDataNegative() throws DataAccessException {
+        Assertions.assertEquals(AuthDAO.getData(), Collections.emptySet());
+    }
+
+    @Test
     @DisplayName("tdads")
     public void getTableSize() throws DataAccessException {
         UserData expectedUser = new UserData("JimBob", "password", "arwals@g.com");
