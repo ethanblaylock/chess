@@ -217,16 +217,15 @@ public class DataAccessTests {
     }
 
     @Test
-    @DisplayName("table size")
-    public void getTableSize() throws DataAccessException {
-        UserData expectedUser = new UserData("JimBob", "password", "arwals@g.com");
-        UserData expectedUser2 = new UserData("Jimdo", "word", "aarwals@g.com");
-        UserData expectedUser3 = new UserData("JamBob", "pass", "arw4als@g.com");
-        UserDAO.createUser(expectedUser);
-        UserDAO.createUser(expectedUser2);
-        UserDAO.createUser(expectedUser3);
-        int size = DatabaseManager.getTableSize("userData");
-        Assertions.assertEquals(3, size);
+    @DisplayName("Get the game Data")
+    public void getGameDataPositive() throws DataAccessException {
+        GameDAO.createGame("test game");
+        Assertions.assertNotNull(GameDAO.getData());
+    }
 
+    @Test
+    @DisplayName("No Game data")
+    public void getGameDataNegative() throws DataAccessException {
+        Assertions.assertEquals(GameDAO.getData(), Collections.emptySet());
     }
 }
