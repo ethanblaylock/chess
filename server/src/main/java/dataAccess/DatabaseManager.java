@@ -8,10 +8,18 @@ import java.util.HashSet;
 import java.util.Properties;
 
 public class DatabaseManager {
+
+    public DatabaseManager() throws DataAccessException {
+        configureDatabase();
+    }
     private static final String databaseName;
     private static final String user;
     private static final String password;
     private static final String connectionUrl;
+
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+    }
 
     /*
      * Load the database information for the db.properties file.
