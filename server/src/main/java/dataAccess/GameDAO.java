@@ -2,13 +2,11 @@ package dataAccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
 import model.GameData;
 
 import java.util.*;
 
 public class GameDAO {
-    private static final Collection<GameData> data = new HashSet<>();
     private static final Gson serializer = new Gson();
     private static final String tableName = "gameData";
 
@@ -26,7 +24,6 @@ public class GameDAO {
         }
         int gameID = DatabaseManager.getTableSize(tableName) + 1;
         GameData gameData = new GameData(gameID, null, null, gameName, new ChessGame());
-        data.add(gameData);
         String gameJson = serializer.toJson(gameData);
         DatabaseManager.createDatabase();
         DatabaseManager.createTable(tableName);
@@ -56,7 +53,6 @@ public class GameDAO {
     public static void updateGame(GameData gameData) throws DataAccessException {
         String gameJson = serializer.toJson(gameData);
         DatabaseManager.updateGameData(tableName, gameJson, String.valueOf(gameData.gameID()));
-        data.add(gameData);
     }
 
     /**
