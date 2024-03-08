@@ -61,21 +61,6 @@ public class GameDAO {
     }
 
     /**
-     * Deletes a particular game given by the gameData
-     * @param gameData the gameData that dictates what is to be deleted
-     * @throws DataAccessException if the game to be deleted does not exist
-     */
-    public static void deleteGame(GameData gameData) throws DataAccessException {
-        if (getGame(gameData.gameID()) != null) {
-            data.remove(getGame(gameData.gameID()));
-            String gameJson = serializer.toJson(getGame(gameData.gameID()));
-            DatabaseManager.deleteData(tableName, gameJson);
-        } else {
-            throw new DataAccessException("Tried to delete a game that does not exist");
-        }
-    }
-
-    /**
      * Clears all the gameData
      */
     public static void clear() throws DataAccessException {
