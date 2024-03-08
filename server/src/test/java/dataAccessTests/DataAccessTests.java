@@ -15,7 +15,6 @@ public class DataAccessTests {
 
     @BeforeEach
     public void setupDatabase() throws DataAccessException {
-        DatabaseManager.dropDatabase();
         DatabaseManager.createDatabase();
         DatabaseManager.createTable("userData");
         DatabaseManager.createTable("authData");
