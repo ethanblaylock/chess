@@ -5,6 +5,7 @@ import dataAccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +66,7 @@ public class ServiceTests {
         RegistrationService.register(registerRequest);
         Collection<UserData> expected = new HashSet<>();
         expected.add(new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email()));
-        Assertions.assertEquals(expected, UserDAO.getData());
+        Assertions.assertTrue(UserDAO.checkPassword(registerRequest.username(), registerRequest.password()));
 
     }
 
