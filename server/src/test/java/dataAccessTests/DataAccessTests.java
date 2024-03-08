@@ -111,21 +111,40 @@ public class DataAccessTests {
     }
 
     @Test
-    @DisplayName("Get users")
+    @DisplayName("Get auths")
     public void getAuthTestPositive() throws DataAccessException {
-        UserData expectedUser = new UserData("JimBob", "password", "arwals@g.com");
-        UserDAO.createUser(expectedUser);
-        UserData userData = UserDAO.getUser("JimBob");
-        assert userData != null;
-        Assertions.assertEquals(expectedUser.email(), userData.email());
-        Assertions.assertEquals(expectedUser.username(), userData.username());
+        AuthData actual = AuthDAO.createAuth("JimBob");
+        AuthData obtained = AuthDAO.getAuth(actual.authToken());
+        Assertions.assertEquals(actual, obtained);
     }
 
     @Test
-    @DisplayName("No users")
+    @DisplayName("No auths")
     public void getAuthTestNegative() throws DataAccessException {
-        UserData userData = UserDAO.getUser("JimBob");
-        Assertions.assertNull(userData);
+        AuthData authData = AuthDAO.getAuth("JimBob");
+        Assertions.assertNull(authData);
+    }
+
+    @Test
+    @DisplayName("delete auth")
+    public void deleteAuthTestPositive() throws DataAccessException {
+        AuthData authData = AuthDAO.createAuth("JimBob");
+        AuthDAO.deleteAuth(authData);
+        Assertions.assertEquals(AuthDAO.getData(), Collections.emptySet());
+    }
+
+    @Test
+    @DisplayName("no auth to delete")
+    public void deleteAuthTestNegative() throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> AuthDAO.deleteAuth(new AuthData("fake auth", "fake username")));
+    }
+
+    @Test
+    @DisplayName("Clear auths")
+    public void authClear() throws DataAccessException {
+        AuthData expectedAuth = AuthDAO.createAuth("JimBob");
+        AuthDAO.clear();
+        Assertions.assertEquals(AuthDAO.getData(), Collections.emptySet());
     }
 
     @Test
