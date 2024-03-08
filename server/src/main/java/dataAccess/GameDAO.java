@@ -8,6 +8,7 @@ import java.util.*;
 
 public class GameDAO {
 
+    //constructor
     public GameDAO() throws DataAccessException {
         configureDatabase();
     }
