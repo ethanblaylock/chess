@@ -19,6 +19,9 @@ public class DatabaseManager {
 
     private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
+        DatabaseManager.createTable("userData");
+        DatabaseManager.createTable("authData");
+        DatabaseManager.createTable("gameData");
     }
 
     /*
