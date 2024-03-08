@@ -1,5 +1,6 @@
 package dataAccessTests;
 
+import chess.ChessGame;
 import dataAccess.*;
 import model.AuthData;
 import model.GameData;
@@ -136,14 +137,14 @@ public class DataAccessTests {
 
     @Test
     @DisplayName("no auth to delete")
-    public void deleteAuthTestNegative() throws DataAccessException {
+    public void deleteAuthTestNegative() {
         Assertions.assertThrows(DataAccessException.class, () -> AuthDAO.deleteAuth(new AuthData("fake auth", "fake username")));
     }
 
     @Test
     @DisplayName("Clear auths")
     public void authClear() throws DataAccessException {
-        AuthData expectedAuth = AuthDAO.createAuth("JimBob");
+        AuthDAO.createAuth("JimBob");
         AuthDAO.clear();
         Assertions.assertEquals(AuthDAO.getData(), Collections.emptySet());
     }
@@ -191,11 +192,36 @@ public class DataAccessTests {
     }
 
     @Test
-    @DisplayName("tdads")
+    @DisplayName("Updates game")
+    public void updateGameTestPositive() throws DataAccessException {
+        GameData first = GameDAO.createGame("test game");
+        GameData updated = new GameData(1, "not null", null, "test game", new ChessGame());
+        GameDAO.updateGame(updated);
+        Assertions.assertNotEquals(first, GameDAO.getGame(updated.gameID()));
+    }
+
+    @Test
+    @DisplayName("Not updated")
+    public void updateGameTestNegative() throws DataAccessException {
+        GameData first = GameDAO.createGame("test game");
+        GameData updated = new GameData(1, "not null", null, "test game", new ChessGame());
+        Assertions.assertEquals(first, GameDAO.getGame(updated.gameID()));
+    }
+
+    @Test
+    @DisplayName("Clear games")
+    public void gameClear() throws DataAccessException {
+        GameDAO.createGame("test game");
+        GameDAO.clear();
+        Assertions.assertEquals(GameDAO.getData(), Collections.emptySet());
+    }
+
+    @Test
+    @DisplayName("table size")
     public void getTableSize() throws DataAccessException {
         UserData expectedUser = new UserData("JimBob", "password", "arwals@g.com");
-        UserData expectedUser2 = new UserData("Jimdob", "pasdsword", "aarwals@g.com");
-        UserData expectedUser3 = new UserData("JaimBob", "passwohrd", "arw4als@g.com");
+        UserData expectedUser2 = new UserData("Jimdo", "word", "aarwals@g.com");
+        UserData expectedUser3 = new UserData("JamBob", "pass", "arw4als@g.com");
         UserDAO.createUser(expectedUser);
         UserDAO.createUser(expectedUser2);
         UserDAO.createUser(expectedUser3);

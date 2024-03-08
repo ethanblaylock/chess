@@ -56,7 +56,6 @@ public class GameDAO {
     public static void updateGame(GameData gameData) throws DataAccessException {
         String gameJson = serializer.toJson(gameData);
         DatabaseManager.updateGameData(tableName, gameJson, String.valueOf(gameData.gameID()));
-        //DatabaseManager.executeInsert(tableName, gameJson);
         data.add(gameData);
     }
 
