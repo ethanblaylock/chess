@@ -38,6 +38,28 @@ public class ChessPiece {
         return Objects.hash(pieceColor, type);
     }
 
+    @Override
+    public String toString() {
+        return switch (pieceColor) {
+            case WHITE -> switch (type) {
+                case KNIGHT -> ChessPieceCharacters.WHITE_KNIGHT;
+                case BISHOP -> ChessPieceCharacters.WHITE_BISHOP;
+                case ROOK -> ChessPieceCharacters.WHITE_ROOK;
+                case KING -> ChessPieceCharacters.WHITE_KING;
+                case PAWN -> ChessPieceCharacters.WHITE_PAWN;
+                case QUEEN -> ChessPieceCharacters.WHITE_QUEEN;
+            };
+            case BLACK -> switch (type) {
+                case KNIGHT -> ChessPieceCharacters.BLACK_KNIGHT;
+                case BISHOP -> ChessPieceCharacters.BLACK_BISHOP;
+                case ROOK -> ChessPieceCharacters.BLACK_ROOK;
+                case KING -> ChessPieceCharacters.BLACK_KING;
+                case PAWN -> ChessPieceCharacters.BLACK_PAWN;
+                case QUEEN -> ChessPieceCharacters.BLACK_QUEEN;
+            };
+        };
+    }
+
     /**
      * The various different chess piece options
      */
