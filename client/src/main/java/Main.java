@@ -90,7 +90,10 @@ public class Main {
                                 currentState = "[LOGGED IN] >>> ";
                                 // Read response body from InputStream ...
                             } else {
-                                System.out.println("hehe error");
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                                System.out.println(http.getResponseCode());
+                                System.out.println(http.getResponseMessage());
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
@@ -132,7 +135,10 @@ public class Main {
                                 currentState = "[LOGGED IN] >>> ";
                                 // Read response body from InputStream ...
                             } else {
-                                System.out.println("hehe error");
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                                System.out.println(http2.getResponseCode());
+                                System.out.println(http2.getResponseMessage());
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
@@ -202,8 +208,10 @@ public class Main {
                                 int gameID = new Gson().fromJson(jsonText, CreateGameResult.class).gameID();
                                 System.out.println("Success! Game ID is: " + gameID);
                             } else {
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                                 System.out.println(http2.getResponseCode());
                                 System.out.println(http2.getResponseMessage());
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
@@ -231,10 +239,14 @@ public class Main {
                                 InputStream responseBody = http.getInputStream();
                                 String jsonText = IOUtils.toString(responseBody);
                                 Collection<GameData> games = new Gson().fromJson(jsonText, ListGamesResult.class).games();
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                                 System.out.println(games);
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             } else {
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                                 System.out.println(http.getResponseCode());
                                 System.out.println(http.getResponseMessage());
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
@@ -254,7 +266,7 @@ public class Main {
                         URI uri3 = new URI("http://localhost:8080/game");
                         HttpURLConnection http3 = (HttpURLConnection) uri3.toURL().openConnection();
                         http3.setReadTimeout(5000);
-                        http3.setRequestMethod("POST");
+                        http3.setRequestMethod("PUT");
                         http3.setDoOutput(true);
                         // Make the request
                         http3.addRequestProperty("Authorization", authToken);
@@ -272,13 +284,17 @@ public class Main {
                                 // OR
 
                                 //connection.getHeaderField("Content-Length");
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                                 System.out.println("Success!");
                                 ChessBoard board = new ChessBoard();
                                 board.resetBoard();
                                 makeChessBoard(board);
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             } else {
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                                 System.out.println(http3.getResponseCode());
                                 System.out.println(http3.getResponseMessage());
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
@@ -292,7 +308,7 @@ public class Main {
                         URI uri4 = new URI("http://localhost:8080/game");
                         HttpURLConnection http4 = (HttpURLConnection) uri4.toURL().openConnection();
                         http4.setReadTimeout(5000);
-                        http4.setRequestMethod("POST");
+                        http4.setRequestMethod("PUT");
                         http4.setDoOutput(true);
                         // Make the request
                         http4.addRequestProperty("Authorization", authToken);
@@ -310,13 +326,17 @@ public class Main {
                                 // OR
 
                                 //connection.getHeaderField("Content-Length");
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                                 System.out.println("Success!");
                                 ChessBoard board = new ChessBoard();
                                 board.resetBoard();
                                 makeChessBoard(board);
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             } else {
+                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                                 System.out.println(http4.getResponseCode());
                                 System.out.println(http4.getResponseMessage());
+                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
