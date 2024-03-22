@@ -1,8 +1,12 @@
 import chess.*;
 import com.google.gson.Gson;
+import model.GameData;
 import request.CreateGameRequest;
+import request.JoinGameRequest;
 import request.LoginRequest;
 import request.RegisterRequest;
+import result.CreateGameResult;
+import result.ListGamesResult;
 import result.RegisterResult;
 import spark.utils.IOUtils;
 import ui.EscapeSequences;
@@ -11,8 +15,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Scanner;
+
+import static chess.ChessGame.TeamColor.WHITE;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -192,6 +199,8 @@ public class Main {
 
                                 InputStream responseBody = http2.getInputStream();
                                 String jsonText = IOUtils.toString(responseBody);
+                                int gameID = new Gson().fromJson(jsonText, CreateGameResult.class).gameID();
+                                System.out.println("Success! Game ID is: " + gameID);
                             } else {
                                 System.out.println(http2.getResponseCode());
                                 System.out.println(http2.getResponseMessage());
@@ -201,11 +210,117 @@ public class Main {
                         }
                         break;
                     case "list games":
+                        URI uri = new URI("http://localhost:8080/game");
+                        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+                        http.setReadTimeout(5000);
+                        http.setRequestMethod("GET");
+                        http.setDoOutput(true);
+                        // Make the request
+                        http.addRequestProperty("Authorization", authToken);
+                        http.connect();
 
+                        try {
+                            if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                                // Get HTTP response headers, if necessary
+                                // Map<String, List<String>> headers = connection.getHeaderFields();
+
+                                // OR
+
+                                //connection.getHeaderField("Content-Length");
+
+                                InputStream responseBody = http.getInputStream();
+                                String jsonText = IOUtils.toString(responseBody);
+                                Collection<GameData> games = new Gson().fromJson(jsonText, ListGamesResult.class).games();
+                                System.out.println(games);
+                            } else {
+                                System.out.println(http.getResponseCode());
+                                System.out.println(http.getResponseMessage());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("haha caught");
+                        }
                         break;
                     case "join game":
+                        System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                        System.out.print("Game ID: ");
+                        int gameID = Integer.parseInt(scanner.nextLine());
+                        System.out.print("Team Color: ");
+                        String teamColorString = scanner.nextLine().toLowerCase();
+                        ChessGame.TeamColor teamColor = switch (teamColorString) {
+                            case "black" -> ChessGame.TeamColor.BLACK;
+                            default -> WHITE;
+                        };
+                        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                        URI uri3 = new URI("http://localhost:8080/game");
+                        HttpURLConnection http3 = (HttpURLConnection) uri3.toURL().openConnection();
+                        http3.setReadTimeout(5000);
+                        http3.setRequestMethod("POST");
+                        http3.setDoOutput(true);
+                        // Make the request
+                        http3.addRequestProperty("Authorization", authToken);
+                        http3.connect();
+
+                        try (var outputStream = http3.getOutputStream()) {
+                            var jsonBody = new Gson().toJson(new JoinGameRequest(teamColor, gameID));
+                            outputStream.write(jsonBody.getBytes());
+                        }
+                        try {
+                            if (http3.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                                // Get HTTP response headers, if necessary
+                                // Map<String, List<String>> headers = connection.getHeaderFields();
+
+                                // OR
+
+                                //connection.getHeaderField("Content-Length");
+                                System.out.println("Success!");
+                                ChessBoard board = new ChessBoard();
+                                board.resetBoard();
+                                makeChessBoard(board);
+                            } else {
+                                System.out.println(http3.getResponseCode());
+                                System.out.println(http3.getResponseMessage());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("haha caught");
+                        }
                         break;
                     case "join observer":
+                        System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                        System.out.print("Game ID: ");
+                        int gameID2 = Integer.parseInt(scanner.nextLine());
+                        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                        URI uri4 = new URI("http://localhost:8080/game");
+                        HttpURLConnection http4 = (HttpURLConnection) uri4.toURL().openConnection();
+                        http4.setReadTimeout(5000);
+                        http4.setRequestMethod("POST");
+                        http4.setDoOutput(true);
+                        // Make the request
+                        http4.addRequestProperty("Authorization", authToken);
+                        http4.connect();
+
+                        try (var outputStream = http4.getOutputStream()) {
+                            var jsonBody = new Gson().toJson(new JoinGameRequest(null, gameID2));
+                            outputStream.write(jsonBody.getBytes());
+                        }
+                        try {
+                            if (http4.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                                // Get HTTP response headers, if necessary
+                                // Map<String, List<String>> headers = connection.getHeaderFields();
+
+                                // OR
+
+                                //connection.getHeaderField("Content-Length");
+                                System.out.println("Success!");
+                                ChessBoard board = new ChessBoard();
+                                board.resetBoard();
+                                makeChessBoard(board);
+                            } else {
+                                System.out.println(http4.getResponseCode());
+                                System.out.println(http4.getResponseMessage());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("haha caught");
+                        }
                         break;
                 }
             }
