@@ -56,7 +56,6 @@ public class Main {
                         String username = scanner.nextLine();
                         System.out.print("Password: ");
                         String password = scanner.nextLine();
-                        System.out.println("asfdsa");
                         System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                         URI uri = new URI("http://localhost:8080/session");
                         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
@@ -81,7 +80,6 @@ public class Main {
                                 InputStream responseBody = http.getInputStream();
                                 String jsonText = IOUtils.toString(responseBody);
                                 authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
-                                System.out.println("ashfhasdfha");
                                 currentState = "[LOGGED IN] >>> ";
                                 // Read response body from InputStream ...
                             } else {
@@ -195,14 +193,15 @@ public class Main {
                                 InputStream responseBody = http2.getInputStream();
                                 String jsonText = IOUtils.toString(responseBody);
                             } else {
-                                System.out.println("hehe error");
                                 System.out.println(http2.getResponseCode());
+                                System.out.println(http2.getResponseMessage());
                             }
                         } catch (Exception e) {
                             System.out.println("haha caught");
                         }
                         break;
                     case "list games":
+
                         break;
                     case "join game":
                         break;
