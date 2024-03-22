@@ -207,12 +207,13 @@ public class ServerFacade {
         }
     }
 
-    public static void logout() throws Exception{
+    public static void logout(String authToken) throws Exception{
         URI uri = new URI("http://localhost:8080/session");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setReadTimeout(5000);
         http.setRequestMethod("DELETE");
         http.setDoOutput(true);
+        http.addRequestProperty("Authorization", authToken);
         // Make the request
         http.connect();
 

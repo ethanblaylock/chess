@@ -114,6 +114,7 @@ public class Main {
                         System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                         break;
                     case "logout":
+                        ServerFacade.logout(authToken);
                         currentState = "[LOGGED OUT] >>> ";
                         break;
                     case "create game":
@@ -144,42 +145,7 @@ public class Main {
                         System.out.print("Game ID: ");
                         int gameID2 = Integer.parseInt(scanner.nextLine());
                         System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                        URI uri4 = new URI("http://localhost:8080/game");
-                        HttpURLConnection http4 = (HttpURLConnection) uri4.toURL().openConnection();
-                        http4.setReadTimeout(5000);
-                        http4.setRequestMethod("PUT");
-                        http4.setDoOutput(true);
-                        // Make the request
-                        http4.addRequestProperty("Authorization", authToken);
-                        http4.connect();
-
-                        try (var outputStream = http4.getOutputStream()) {
-                            var jsonBody = new Gson().toJson(new JoinGameRequest(null, gameID2));
-                            outputStream.write(jsonBody.getBytes());
-                        }
-                        try {
-                            if (http4.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                                // Get HTTP response headers, if necessary
-                                // Map<String, List<String>> headers = connection.getHeaderFields();
-
-                                // OR
-
-                                //connection.getHeaderField("Content-Length");
-                                System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                                System.out.println("Success!");
-                                ChessBoard board = new ChessBoard();
-                                board.resetBoard();
-                                makeChessBoard(board);
-                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                            } else {
-                                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                                System.out.println(http4.getResponseCode());
-                                System.out.println(http4.getResponseMessage());
-                                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("haha caught");
-                        }
+                        ServerFacade.joinGame(gameID2, null, authToken);
                         break;
                 }
             }
