@@ -1,3 +1,5 @@
+package ServerFacade;
+
 import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
@@ -18,6 +20,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+
+import static ui.makeBoard.makeChessBoard;
 
 public class ServerFacade {
     public static String login(String username, String password) throws Exception {
@@ -194,7 +198,7 @@ public class ServerFacade {
                 System.out.println("Success!");
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
-                Main.makeChessBoard(board);
+                makeChessBoard(board);
                 System.out.print(EscapeSequences.RESET_TEXT_COLOR);
             } else {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
@@ -239,4 +243,6 @@ public class ServerFacade {
             System.out.println("haha caught");
         }
     }
+
+
 }
