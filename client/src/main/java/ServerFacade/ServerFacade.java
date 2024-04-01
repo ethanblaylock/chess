@@ -17,11 +17,9 @@ import ui.EscapeSequences;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
-import static ui.makeBoard.makeChessBoard;
+import static ui.MakeBoard.makeChessBoard;
 
 public class ServerFacade {
     public static String login(String username, String password) throws Exception {

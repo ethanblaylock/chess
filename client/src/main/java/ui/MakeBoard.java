@@ -3,7 +3,7 @@ package ui;
 import chess.ChessBoard;
 import chess.ChessPosition;
 
-public class makeBoard {
+public class MakeBoard {
     public static void makeChessBoard(ChessBoard board) {
         System.out.print(EscapeSequences.SET_TEXT_COLOR_DARK_GREY);
         int flipper = 0;
