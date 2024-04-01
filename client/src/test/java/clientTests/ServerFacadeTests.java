@@ -1,13 +1,10 @@
 package clientTests;
 
 import chess.ChessGame;
-import dataAccess.DataAccessException;
-import dataAccess.UserDAO;
 import org.junit.jupiter.api.*;
 import server.Server;
 import ServerFacade.ServerFacade;
-
-import java.net.SocketException;
+import service.ClearService;
 
 
 public class ServerFacadeTests {
@@ -19,6 +16,7 @@ public class ServerFacadeTests {
         server = new Server();
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+        ClearService.clearApplication();
     }
 
     @AfterAll
@@ -35,12 +33,12 @@ public class ServerFacadeTests {
     @Test
     public void loginTestPositive() throws Exception {
         ServerFacade.register("bob", "ross", "email");
-        Assertions.assertNull(ServerFacade.login("bob", "ross"));
+        Assertions.assertNotNull(ServerFacade.login("bob", "ross"));
     }
 
     @Test
     public void loginTestNegative() throws Exception {
-        Assertions.assertNull(ServerFacade.login("bob", "ross"));
+        Assertions.assertNull(ServerFacade.login("bobb", "ross"));
     }
 
     @Test
@@ -57,7 +55,7 @@ public class ServerFacadeTests {
 
     @Test
     public void registerTestPositive() throws Exception {
-        Assertions.assertNull(ServerFacade.register("bob", "ross", "email"));
+        Assertions.assertNotNull(ServerFacade.register("bob", "ross", "email"));
     }
 
     @Test
