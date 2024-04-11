@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Objects;
 
 import static ui.MakeBoard.makeChessBoard;
 
@@ -194,9 +195,12 @@ public class ServerFacade {
                 //connection.getHeaderField("Content-Length");
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                 System.out.println("Success!");
-                ChessBoard board = new ChessBoard();
-                board.resetBoard();
-                makeChessBoard(board);
+
+                for (GameData game : Objects.requireNonNull(getGames(authToken))) {
+                    if (game.gameID() == gameID) {
+                        makeChessBoard(game.game().getBoard());
+                    }
+                }
                 System.out.print(EscapeSequences.RESET_TEXT_COLOR);
             } else {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
@@ -207,6 +211,31 @@ public class ServerFacade {
         } catch (Exception e) {
             System.out.println("haha caught");
         }
+    }
+
+    public static Collection<GameData> getGames(String authToken) throws Exception {
+        URI uri = new URI("http://localhost:8080/game");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setReadTimeout(5000);
+        http.setRequestMethod("GET");
+        http.setDoOutput(true);
+        // Make the request
+        http.addRequestProperty("Authorization", authToken);
+        http.connect();
+
+        try {
+            if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // Get HTTP response headers, if necessary
+                // Map<String, List<String>> headers = connection.getHeaderFields();
+
+                InputStream responseBody = http.getInputStream();
+                String jsonText = IOUtils.toString(responseBody);
+                return new Gson().fromJson(jsonText, ListGamesResult.class).games();
+            }
+        } catch (Exception e) {
+            System.out.println("haha caught");
+        }
+        return null;
     }
 
     public static void logout(String authToken) throws Exception{

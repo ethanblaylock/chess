@@ -15,7 +15,10 @@ public class ChessGame {
     private ChessBoard board;
     private ChessBoard tempBoard;
 
-    public ChessGame() {}
+    public ChessGame() {
+        board = new ChessBoard();
+        board.resetBoard();
+    }
 
     @Override
     public boolean equals(Object o) {
