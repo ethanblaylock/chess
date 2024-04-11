@@ -4,14 +4,15 @@ import java.util.Objects;
 
 /**
  * Represents a command a user can send the server over a websocket
- * 
+ *
  * Note: You can add to this class, but you should not alter the existing
  * methods.
  */
 public class UserGameCommand {
 
-    public UserGameCommand(String authToken) {
+    public UserGameCommand(String authToken, int gameID) {
         this.authToken = authToken;
+        this.gameID = gameID;
     }
 
     public enum CommandType {
@@ -25,11 +26,13 @@ public class UserGameCommand {
     protected CommandType commandType;
 
     private final String authToken;
+    private final int gameID;
 
     public String getAuthString() {
         return authToken;
     }
 
+    public int getGameID() {return gameID; }
     public CommandType getCommandType() {
         return this.commandType;
     }
