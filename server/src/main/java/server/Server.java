@@ -3,12 +3,15 @@ package server;
 import dataAccess.DataAccessException;
 import dataAccess.DatabaseManager;
 import handler.*;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.*;
 import spark.*;
+import org.eclipse.jetty.websocket.api.annotations.*;
 
 
 public class Server {
     public static void main(String[] args)  {
-        new Server().run(8080);
+        new Server().run(8000);
     }
 
     public int run(int desiredPort) {
@@ -20,7 +23,7 @@ public class Server {
         } catch (DataAccessException ignored) {
 
         }
-
+        WSServer wsServer = new WSServer();
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
@@ -29,6 +32,7 @@ public class Server {
         Spark.externalStaticFileLocation("public");
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/connect", wsServer);
         Spark.post("/user", RegistrationHandler::handleRequest);
         Spark.post("/session", LoginHandler::handleRequest);
         Spark.delete("/session", LogoutHandler::handleRequest);
@@ -36,7 +40,6 @@ public class Server {
         Spark.post("/game", CreateGameHandler::handleRequest);
         Spark.put("/game", JoinGameHandler::handlerRequest);
         Spark.delete("/db", ClearHandler::handleRequest);
-
 
 
 
@@ -50,6 +53,5 @@ public class Server {
         Spark.stop();
         Spark.awaitStop();
     }
-
 
 }
