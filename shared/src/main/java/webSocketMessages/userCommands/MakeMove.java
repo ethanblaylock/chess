@@ -9,4 +9,6 @@ public class MakeMove extends UserGameCommand{
         commandType = CommandType.MAKE_MOVE;
         this.move = move;
     }
+
+    public ChessMove getMove() {return move;}
 }
