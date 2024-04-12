@@ -11,7 +11,6 @@ import request.RegisterRequest;
 import result.CreateGameResult;
 import result.ListGamesResult;
 import result.RegisterResult;
-import spark.utils.IOUtils;
 import ui.EscapeSequences;
 
 import webSocketMessages.userCommands.*;
@@ -52,7 +51,7 @@ public class ServerFacade {
         try {
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream responseBody = http.getInputStream();
-                String jsonText = IOUtils.toString(responseBody);
+                String jsonText = responseBody.toString();
                 authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
                 return authToken;
                 // Read response body from InputStream ...
@@ -107,7 +106,7 @@ public class ServerFacade {
                 //connection.getHeaderField("Content-Length");
 
                 InputStream responseBody = http2.getInputStream();
-                String jsonText = IOUtils.toString(responseBody);
+                String jsonText = responseBody.toString();
                 int gameID = new Gson().fromJson(jsonText, CreateGameResult.class).gameID();
                 System.out.println("Success! Game ID is: " + gameID);
             } else {
@@ -141,7 +140,7 @@ public class ServerFacade {
                 //connection.getHeaderField("Content-Length");
 
                 InputStream responseBody = http.getInputStream();
-                String jsonText = IOUtils.toString(responseBody);
+                String jsonText = responseBody.toString();
                 Collection<GameData> games = new Gson().fromJson(jsonText, ListGamesResult.class).games();
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                 System.out.println(games);
