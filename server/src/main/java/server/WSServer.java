@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
@@ -53,11 +54,21 @@ public class WSServer {
                 }
                 break;
             case MAKE_MOVE:
-                for (var session1 : connections.values()) {
-                    session1.getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
-                    if (session1.isOpen()) {
-                        if (session1 != session) {
-                            session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " made the move: " + new Gson().fromJson(message, MakeMove.class).getMove())));
+                boolean noError = true;
+                ChessMove move = new Gson().fromJson(message, MakeMove.class).getMove();
+                try {
+                    Objects.requireNonNull(GameDAO.getGame(1)).game().makeMove(move);
+                } catch (Exception e) {
+                    noError = false;
+                    session.getRemote().sendString(new Gson().toJson(new Error(e.getMessage())));
+                }
+                if (noError) {
+                    for (var session1 : connections.values()) {
+                        session1.getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
+                        if (session1.isOpen()) {
+                            if (session1 != session) {
+                                session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " made the move: " + move)));
+                            }
                         }
                     }
                 }
