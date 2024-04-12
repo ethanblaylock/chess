@@ -64,14 +64,13 @@ public class Main {
                         case "register":
                             System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                             System.out.print("Username: ");
-                            String username_register = scanner.nextLine();
-                            username = username_register;
+                            String usernameRegister = scanner.nextLine();
                             System.out.print("Password: ");
-                            String password_register = scanner.nextLine();
+                            String passwordRegister = scanner.nextLine();
                             System.out.print("Email: ");
-                            String email_register = scanner.nextLine();
+                            String emailRegister = scanner.nextLine();
                             System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                            authToken = serverFacade.register(username_register, password_register, email_register);
+                            authToken = serverFacade.register(usernameRegister, passwordRegister, emailRegister);
                             if (authToken != null) {
                                 currentState = "[LOGGED IN] >>> ";
                             }
@@ -183,16 +182,16 @@ public class Main {
                         case "make move":
                             System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                             System.out.print("From row (1-8): ");
-                            int current_row = Integer.parseInt(scanner.nextLine());
+                            int currentRow = Integer.parseInt(scanner.nextLine());
                             System.out.print("From col (a-h): ");
-                            int current_col = (int) scanner.nextLine().charAt(0) - 96;
+                            int currentCol = (int) scanner.nextLine().charAt(0) - 96;
                             System.out.print("To row (1-8): ");
-                            int to_row = Integer.parseInt(scanner.nextLine());
+                            int toRow = Integer.parseInt(scanner.nextLine());
                             System.out.print("To col (a-h): ");
-                            int to_col = (int) scanner.nextLine().charAt(0) - 96;
+                            int toCol = (int) scanner.nextLine().charAt(0) - 96;
                             System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                            ChessPosition fromPos = new ChessPosition(current_row, current_col);
-                            ChessPosition toPos = new ChessPosition(to_row, to_col);
+                            ChessPosition fromPos = new ChessPosition(currentRow, currentCol);
+                            ChessPosition toPos = new ChessPosition(toRow, toCol);
                             ChessMove move = new ChessMove(fromPos, toPos, null);
                             serverFacade.makeMove(move);
                             break;
