@@ -2,7 +2,10 @@ package ServerFacade;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
+import dataAccess.DataAccessException;
+import dataAccess.GameDAO;
 import model.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -13,7 +16,13 @@ import result.ListGamesResult;
 import result.RegisterResult;
 import spark.utils.IOUtils;
 import ui.EscapeSequences;
+import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.*;
 
+import javax.websocket.*;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -23,8 +32,15 @@ import java.util.Objects;
 import static ui.MakeBoard.makeChessBoard;
 
 public class ServerFacade {
-    public static String login(String username, String password) throws Exception {
-        URI uri = new URI("http://localhost:8080/session");
+    WSFacade ws = null;
+    public static int currentGameID;
+    public static String authToken;
+
+    public static ChessGame.TeamColor teamColor;
+
+
+    public String login(String username, String password) throws Exception {
+        URI uri = new URI("http://localhost:8000/session");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setReadTimeout(5000);
         http.setRequestMethod("POST");
@@ -46,7 +62,8 @@ public class ServerFacade {
 
                 InputStream responseBody = http.getInputStream();
                 String jsonText = IOUtils.toString(responseBody);
-                return new Gson().fromJson(jsonText, RegisterResult.class).authToken();
+                authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
+                return authToken;
                 // Read response body from InputStream ...
             } else {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
@@ -60,8 +77,8 @@ public class ServerFacade {
         return null;
     }
 
-    public static String register(String username, String password, String email) throws Exception {
-        URI uri2 = new URI("http://localhost:8080/user");
+    public String register(String username, String password, String email) throws Exception {
+        URI uri2 = new URI("http://localhost:8000/user");
         HttpURLConnection http2 = (HttpURLConnection) uri2.toURL().openConnection();
         http2.setReadTimeout(5000);
         http2.setRequestMethod("POST");
@@ -83,7 +100,8 @@ public class ServerFacade {
 
                 InputStream responseBody = http2.getInputStream();
                 String jsonText = IOUtils.toString(responseBody);
-                return new Gson().fromJson(jsonText, RegisterResult.class).authToken();
+                authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
+                return authToken;
                 // Read response body from InputStream ...
             } else {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
@@ -97,8 +115,8 @@ public class ServerFacade {
         return null;
     }
 
-    public static void createGame(String gameName, String authToken) throws Exception{
-        URI uri2 = new URI("http://localhost:8080/game");
+    public void createGame(String gameName, String authToken) throws Exception{
+        URI uri2 = new URI("http://localhost:8000/game");
         HttpURLConnection http2 = (HttpURLConnection) uri2.toURL().openConnection();
         http2.setReadTimeout(5000);
         http2.setRequestMethod("POST");
@@ -135,8 +153,8 @@ public class ServerFacade {
         }
     }
 
-    public static void listGames(String authToken) throws Exception{
-        URI uri = new URI("http://localhost:8080/game");
+    public void listGames(String authToken) throws Exception{
+        URI uri = new URI("http://localhost:8000/game");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setReadTimeout(5000);
         http.setRequestMethod("GET");
@@ -171,8 +189,8 @@ public class ServerFacade {
         }
     }
 
-    public static void joinGame(int gameID, ChessGame.TeamColor teamColor, String authToken) throws Exception {
-        URI uri3 = new URI("http://localhost:8080/game");
+    public void joinGame(int gameID, ChessGame.TeamColor teamColor, String authToken, String username) throws Exception {
+        URI uri3 = new URI("http://localhost:8000/game");
         HttpURLConnection http3 = (HttpURLConnection) uri3.toURL().openConnection();
         http3.setReadTimeout(5000);
         http3.setRequestMethod("PUT");
@@ -180,7 +198,8 @@ public class ServerFacade {
         // Make the request
         http3.addRequestProperty("Authorization", authToken);
         http3.connect();
-
+        currentGameID = gameID;
+        ServerFacade.teamColor = teamColor;
         try (var outputStream = http3.getOutputStream()) {
             var jsonBody = new Gson().toJson(new JoinGameRequest(teamColor, gameID));
             outputStream.write(jsonBody.getBytes());
@@ -196,12 +215,15 @@ public class ServerFacade {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                 System.out.println("Success!");
 
-                for (GameData game : Objects.requireNonNull(getGames(authToken))) {
-                    if (game.gameID() == gameID) {
-                        makeChessBoard(game.game().getBoard());
-                    }
-                }
                 System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                if (ws == null) {
+                    ws = new WSFacade();
+                }
+                if (teamColor != null) {
+                    ws.send(new Gson().toJson(new JoinPlayer(authToken, gameID, teamColor, username)));
+                } else {
+                    ws.send(new Gson().toJson(new JoinObserver(authToken, gameID, username)));
+                }
             } else {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                 System.out.println(http3.getResponseCode());
@@ -213,8 +235,8 @@ public class ServerFacade {
         }
     }
 
-    public static Collection<GameData> getGames(String authToken) throws Exception {
-        URI uri = new URI("http://localhost:8080/game");
+    public Collection<GameData> getGames(String authToken) throws Exception {
+        URI uri = new URI("http://localhost:8000/game");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setReadTimeout(5000);
         http.setRequestMethod("GET");
@@ -238,8 +260,8 @@ public class ServerFacade {
         return null;
     }
 
-    public static void logout(String authToken) throws Exception{
-        URI uri = new URI("http://localhost:8080/session");
+    public void logout(String authToken) throws Exception{
+        URI uri = new URI("http://localhost:8000/session");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setReadTimeout(5000);
         http.setRequestMethod("DELETE");
@@ -271,5 +293,33 @@ public class ServerFacade {
         }
     }
 
+    public void leave() throws Exception {
+        ws.send(new Gson().toJson(new Leave(authToken, currentGameID)));
+    }
+
+    public void makeMove(ChessMove move) throws Exception {
+        GameData currentGame = GameDAO.getGame(currentGameID);
+        ChessGame game = currentGame.game();
+        game.makeMove(move);
+        GameDAO.updateGame(new GameData(currentGameID, currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
+        ws.send(new Gson().toJson(new MakeMove(authToken, currentGameID, move)));
+    }
+
+    public void resign() throws Exception {
+        GameData currentGame = GameDAO.getGame(currentGameID);
+        ChessGame game = currentGame.game();
+        game.endGame();
+        GameDAO.updateGame(new GameData(currentGameID, currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
+        ws.send(new Gson().toJson(new Resign(authToken, currentGameID)));
+    }
+    public static void redrawBoard() throws DataAccessException {
+        ChessGame.TeamColor color;
+        if (teamColor == ChessGame.TeamColor.BLACK) {
+            color = ChessGame.TeamColor.BLACK;
+        } else {
+            color = ChessGame.TeamColor.WHITE;
+        }
+        makeChessBoard(GameDAO.getGame(currentGameID).game().getBoard(), color);
+    }
 
 }
