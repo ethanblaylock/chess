@@ -2,6 +2,7 @@ import ServerFacade.ServerFacade;
 import chess.*;
 import model.GameData;
 import ui.EscapeSequences;
+import ui.MakeBoard;
 
 import java.util.Scanner;
 
@@ -198,14 +199,22 @@ public class Main {
                 break;
             case "make move":
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                System.out.print("From row (1-8): ");
-                int currentRow = Integer.parseInt(scanner.nextLine());
+                if (serverFacade.getGame(authToken, gameID).isGameOver()) {
+                    System.out.println("Game is over, no more moves can be made");
+                    break;
+                }
+                else if (serverFacade.getGame(authToken, gameID).getTeamTurn() != teamColor) {
+                    System.out.println("Not your turn yet");
+                    break;
+                }
                 System.out.print("From col (a-h): ");
                 int currentCol = (int) scanner.nextLine().charAt(0) - 96;
-                System.out.print("To row (1-8): ");
-                int toRow = Integer.parseInt(scanner.nextLine());
+                System.out.print("From row (1-8): ");
+                int currentRow = Integer.parseInt(scanner.nextLine());
                 System.out.print("To col (a-h): ");
                 int toCol = (int) scanner.nextLine().charAt(0) - 96;
+                System.out.print("To row (1-8): ");
+                int toRow = Integer.parseInt(scanner.nextLine());
                 System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                 ChessPosition fromPos = new ChessPosition(currentRow, currentCol);
                 ChessPosition toPos = new ChessPosition(toRow, toCol);
@@ -221,6 +230,12 @@ public class Main {
                 }
                 break;
             case "highlight":
+                System.out.println("Select which piece to see moves for");
+                System.out.print("col (a-h): ");
+                int hilCol = (int) scanner.nextLine().charAt(0) - 96;
+                System.out.print("row (1-8): ");
+                int hilRow = Integer.parseInt(scanner.nextLine());
+                MakeBoard.highlightMove(serverFacade.getGame(authToken, gameID).getBoard(), teamColor, serverFacade.getGame(authToken, gameID).validMoves(new ChessPosition(hilRow, hilCol)));
                 break;
         }
     }

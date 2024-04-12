@@ -11,6 +11,7 @@ import request.RegisterRequest;
 import result.CreateGameResult;
 import result.ListGamesResult;
 import result.RegisterResult;
+import spark.utils.IOUtils;
 import ui.EscapeSequences;
 
 import webSocketMessages.userCommands.*;
@@ -52,7 +53,7 @@ public class ServerFacade {
         try {
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 InputStream responseBody = http.getInputStream();
-                String jsonText = responseBody.toString();
+                String jsonText = IOUtils.toString(responseBody);
                 authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
                 return authToken;
                 // Read response body from InputStream ...
@@ -111,7 +112,7 @@ public class ServerFacade {
                 //connection.getHeaderField("Content-Length");
 
                 InputStream responseBody = http2.getInputStream();
-                String jsonText = responseBody.toString();
+                String jsonText = IOUtils.toString(responseBody);
                 int gameID = new Gson().fromJson(jsonText, CreateGameResult.class).gameID();
                 System.out.println("Success! Game ID is: " + gameID);
             } else {
@@ -142,11 +143,47 @@ public class ServerFacade {
                 //connection.getHeaderField("Content-Length");
 
                 InputStream responseBody = http.getInputStream();
-                String jsonText = responseBody.toString();
+                String jsonText = IOUtils.toString(responseBody);
                 Collection<GameData> games = new Gson().fromJson(jsonText, ListGamesResult.class).games();
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                 System.out.println(games);
                 System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+            } else {
+                doErrorMessage(http);
+            }
+        } catch (Exception e) {
+            System.out.println("haha caught");
+        }
+        return null;
+    }
+
+    public ChessGame getGame(String authToken, int gameID) throws Exception{
+        URI uri = new URI("http://localhost:8000/game");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setReadTimeout(5000);
+        http.setRequestMethod("GET");
+        http.setDoOutput(true);
+        // Make the request
+        http.addRequestProperty("Authorization", authToken);
+        http.connect();
+
+        try {
+            if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // Get HTTP response headers, if necessary
+                // Map<String, List<String>> headers = connection.getHeaderFields();
+
+                // OR
+
+                //connection.getHeaderField("Content-Length");
+
+                InputStream responseBody = http.getInputStream();
+                String jsonText = IOUtils.toString(responseBody);
+                Collection<GameData> games = new Gson().fromJson(jsonText, ListGamesResult.class).games();
+                for (GameData gameData : games) {
+                    if (gameData.gameID() == currentGameID) {
+                         return gameData.game();
+                    }
+                }
             } else {
                 doErrorMessage(http);
             }
@@ -244,15 +281,11 @@ public class ServerFacade {
         } else {
             color = ChessGame.TeamColor.WHITE;
         }
-        GameData currentGame = null;
-        ListGamesResult games = listGames(authToken);
-        for (GameData gameData : games.games()) {
-            if (gameData.gameID() == currentGameID) {
-                currentGame = gameData;
-            }
-        }
+        ChessGame currentGame;
+        currentGame = getGame(authToken, currentGameID);
+
         assert currentGame != null;
-        makeChessBoard(currentGame.game().getBoard(), color);
+        makeChessBoard(currentGame.getBoard(), color);
     }
 
 }

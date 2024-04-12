@@ -93,6 +93,7 @@ public class WSServer {
     private void makeMove(Session session, String message) throws IOException, DataAccessException {
         MakeMove makeMove = new Gson().fromJson(message, MakeMove.class);
         boolean noError = true;
+        String msg = null;
         try {
             if (GameDAO.getGame(makeMove.getGameID()).game().getTeamTurn() == WHITE && !Objects.equals(AuthDAO.getAuth(makeMove.getAuthString()).username(), GameDAO.getGame(makeMove.getGameID()).whiteUsername())) {
                 throw new Exception("Ain't  yur turn");
@@ -103,7 +104,7 @@ public class WSServer {
             currentGame = GameDAO.getGame(makeMove.getGameID());
             assert currentGame != null;
             game = currentGame.game();
-            game.makeMove(makeMove.getMove());
+            msg = game.makeMove(makeMove.getMove());
             GameDAO.updateGame(new GameData(makeMove.getGameID(), currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
         } catch (Exception e) {
             noError = false;
@@ -113,7 +114,10 @@ public class WSServer {
         if (noError) {
             for (Connection con : connections.values()) {
                 if (con.gameID() == makeMove.getGameID()) {
-                    con.session().getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
+                    con.session().getRemote().sendString(new Gson().toJson(new LoadGame(WHITE)));
+                    if (msg != null) {
+                        con.session().getRemote().sendString(new Gson().toJson(new Notification("Game is over due to " + msg + " from " + Objects.requireNonNull(AuthDAO.getAuth(makeMove.getAuthString())).username())));
+                    }
                     if (con.session().isOpen()) {
                         if (con.session() != session) {
                             con.session().getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(makeMove.getAuthString()).username() + " made the move: " + makeMove.getMove())));
@@ -158,17 +162,17 @@ public class WSServer {
         else if (Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).whiteUsername() == null && Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).blackUsername() == null) {
             session.getRemote().sendString(new Gson().toJson(new Error("Empty Team")));
         }
-        else if (joinPlayer.getPlayerColor() == ChessGame.TeamColor.WHITE && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).whiteUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
+        else if (joinPlayer.getPlayerColor() == WHITE && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).whiteUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
             session.getRemote().sendString(new Gson().toJson(new Error("Place taken")));
         }
-        else if (joinPlayer.getPlayerColor() == ChessGame.TeamColor.BLACK && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).blackUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
+        else if (joinPlayer.getPlayerColor() == BLACK && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).blackUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
             session.getRemote().sendString(new Gson().toJson(new Error("Place taken")));
         }
 
-        else if (joinPlayer.getPlayerColor() == ChessGame.TeamColor.WHITE && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).whiteUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
+        else if (joinPlayer.getPlayerColor() == WHITE && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).whiteUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
             session.getRemote().sendString(new Gson().toJson(new Error("Bad Game ID")));
         }
-        else if (joinPlayer.getPlayerColor() == ChessGame.TeamColor.BLACK && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).blackUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
+        else if (joinPlayer.getPlayerColor() == BLACK && !Objects.equals(Objects.requireNonNull(GameDAO.getGame(joinPlayer.getGameID())).blackUsername(), Objects.requireNonNull(AuthDAO.getAuth(joinPlayer.getAuthString())).username())) {
             session.getRemote().sendString(new Gson().toJson(new Error("Bad Game ID")));
         }
 
@@ -194,7 +198,7 @@ public class WSServer {
             session.getRemote().sendString(new Gson().toJson(new Error("Bad auth")));
         } else {
             connections.put(Objects.requireNonNull(AuthDAO.getAuth(joinObserver.getAuthString())).username(), new Connection(session, joinObserver.getGameID()));
-            session.getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
+            session.getRemote().sendString(new Gson().toJson(new LoadGame(WHITE)));
 
             for (Connection con : connections.values()) {
                 if (con.session().isOpen()) {

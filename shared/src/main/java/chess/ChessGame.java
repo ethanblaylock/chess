@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -91,10 +92,13 @@ public class ChessGame {
      * @param move chess move to preform
      * @throws InvalidMoveException if move is invalid
      */
-    public void makeMove(ChessMove move) throws InvalidMoveException {
+    public String makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         if (gameOver) {
             throw new InvalidMoveException("Game is over");
+        }
+        if (validMoves(move.getStartPosition()) == null) {
+            throw new InvalidMoveException("Not valid move");
         }
         if (!validMoves(move.getStartPosition()).contains(move)) { /* Checks for invalid move */
             throw new InvalidMoveException("Not valid move");
@@ -144,11 +148,17 @@ public class ChessGame {
                 throw new InvalidMoveException("Cannot move into check");
             } else { /* Executes the move on the main board and swaps turns */
                 swapTurns();
-                if (isInCheckmate(teamTurn) || isInStalemate(teamTurn)) {
+                if (isInCheckmate(teamTurn)) {
                     endGame();
+                    return "checkmate";
+                }
+                else if (isInStalemate(teamTurn)) {
+                    endGame();
+                    return "stalemate";
                 }
             }
         }
+        return null;
     }
 
     public void endGame() {
@@ -235,6 +245,13 @@ public class ChessGame {
                         }
                     }
                 }
+            }
+        }
+        if (!checkPositions.isEmpty()) {
+            if (validMoves(kingPosition) != null) {
+                return false;
+            } else {
+                return true;
             }
         }
         return !checkPositions.isEmpty(); /* If there are still positions that check the king, it is checkmate */
