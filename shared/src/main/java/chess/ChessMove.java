@@ -62,4 +62,13 @@ public class ChessMove {
                 && endPosition.getColumn() >= 1
                 && endPosition.getColumn() <= 8;
     }
+
+    @Override
+    public String toString() {
+        return "ChessMove{" +
+                "startPosition=" + startPosition +
+                ", endPosition=" + endPosition +
+                ", promotionPiece=" + promotionPiece +
+                '}';
+    }
 }

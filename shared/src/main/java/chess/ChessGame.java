@@ -15,9 +15,13 @@ public class ChessGame {
     private ChessBoard board;
     private ChessBoard tempBoard;
 
+    private boolean gameOver;
+
     public ChessGame() {
+        teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
         board.resetBoard();
+        gameOver = false;
     }
 
     @Override
@@ -89,6 +93,9 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (gameOver) {
+            throw new InvalidMoveException("Game is over");
+        }
         if (!validMoves(move.getStartPosition()).contains(move)) { /* Checks for invalid move */
             throw new InvalidMoveException("Not valid move");
         }
@@ -137,10 +144,16 @@ public class ChessGame {
                 throw new InvalidMoveException("Cannot move into check");
             } else { /* Executes the move on the main board and swaps turns */
                 swapTurns();
+                if (isInCheckmate(teamTurn) || isInStalemate(teamTurn)) {
+                    endGame();
+                }
             }
         }
     }
 
+    public void endGame() {
+        gameOver = true;
+    }
     /**
      * Swaps the team whose turn it is
      */
