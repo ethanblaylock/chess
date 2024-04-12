@@ -178,13 +178,4 @@ public class DatabaseManager {
         }
     }
 
-    public static void dropDatabase() throws DataAccessException {
-        try (var conn = getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("DROP DATABASE chess")) {
-                preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException((e.getMessage()));
-        }
-    }
 }

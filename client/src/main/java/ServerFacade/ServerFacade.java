@@ -15,6 +15,7 @@ import ui.EscapeSequences;
 
 import webSocketMessages.userCommands.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -56,15 +57,19 @@ public class ServerFacade {
                 return authToken;
                 // Read response body from InputStream ...
             } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println(http.getResponseCode());
-                System.out.println(http.getResponseMessage());
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                doErrorMessage(http);
             }
         } catch (Exception e) {
             System.out.println("haha caught");
         }
         return null;
+    }
+
+    private static void doErrorMessage(HttpURLConnection http) throws IOException {
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+        System.out.println(http.getResponseCode());
+        System.out.println(http.getResponseMessage());
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
     }
 
     public String register(String username, String password, String email) throws Exception {
@@ -110,10 +115,7 @@ public class ServerFacade {
                 int gameID = new Gson().fromJson(jsonText, CreateGameResult.class).gameID();
                 System.out.println("Success! Game ID is: " + gameID);
             } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println(http2.getResponseCode());
-                System.out.println(http2.getResponseMessage());
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                doErrorMessage(http2);
             }
         } catch (Exception e) {
             System.out.println("haha caught");
@@ -146,10 +148,7 @@ public class ServerFacade {
                 System.out.println(games);
                 System.out.print(EscapeSequences.RESET_TEXT_COLOR);
             } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println(http.getResponseCode());
-                System.out.println(http.getResponseMessage());
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                doErrorMessage(http);
             }
         } catch (Exception e) {
             System.out.println("haha caught");
@@ -193,10 +192,7 @@ public class ServerFacade {
                     ws.send(new Gson().toJson(new JoinObserver(authToken, gameID, username)));
                 }
             } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println(http3.getResponseCode());
-                System.out.println(http3.getResponseMessage());
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                doErrorMessage(http3);
             }
         } catch (Exception e) {
             System.out.println("haha caught");
@@ -223,10 +219,7 @@ public class ServerFacade {
                 //connection.getHeaderField("Content-Length");
                 // Read response body from InputStream ...
             } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println(http.getResponseCode());
-                System.out.println(http.getResponseMessage());
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                doErrorMessage(http);
             }
         } catch (Exception e) {
             System.out.println("haha caught");
