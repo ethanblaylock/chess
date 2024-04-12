@@ -21,53 +21,62 @@ import webSocketMessages.userCommands.*;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class WSServer {
-    private Collection<Session> currentSessions = new HashSet<>();
+    public final ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
+
 
     public WSServer() {}
 
     @OnWebSocketClose
     public void onClose(Session session, int g, String msg) {
+        System.out.println("This is the message form closingu: " + msg + "This is the code: " + g);
+        System.out.println(session.isOpen());
     }
 
     @OnWebSocketError
     public void onError(Throwable throwable) {
         System.out.println(throwable.getMessage());
+        throwable.printStackTrace();
         System.out.println(("eroaosdfk"));
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
         System.out.println("happy ahsdafl asldkfasldkj");
+        System.out.println(session.isOpen());
         UserGameCommand tempCommand = new Gson().fromJson(message, UserGameCommand.class);
         switch(tempCommand.getCommandType()) {
             case LEAVE:
-                currentSessions.remove(session);
-                for (Session session1 : currentSessions) {
+                connections.remove(Objects.requireNonNull(AuthDAO.getAuth(tempCommand.getAuthString())).username());
+                for (Session session1 : connections.values()) {
                     session1.getRemote().sendString(new Gson().toJson(new Notification("Player left game: " + AuthDAO.getAuth(tempCommand.getAuthString()).username())));
                 }
                 break;
             case RESIGN:
-                for (Session session1 : currentSessions) {
+                for (Session session1 :  connections.values()) {
                     session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " has resigned the game")));
                 }
                 break;
             case MAKE_MOVE:
-                for (Session session1 : currentSessions) {
+                for (var session1 : connections.values()) {
                     session1.getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
-                    if (session1 != session) {
-                        session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " made the move: " + new Gson().fromJson(message, MakeMove.class).getMove())));
+                    if (session1.isOpen()) {
+                        if (session1 != session) {
+                            session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " made the move: " + new Gson().fromJson(message, MakeMove.class).getMove())));
+                        }
                     }
                 }
                 break;
             case JOIN_PLAYER:
                 JoinPlayer joinPlayer = new Gson().fromJson(message, JoinPlayer.class);
-                currentSessions.add(session);
+
                 if (GameDAO.getGame(joinPlayer.getGameID()) == null) {
                 session.getRemote().sendString(new Gson().toJson(new Error("Bad Game ID")));
                 }
@@ -92,27 +101,35 @@ public class WSServer {
                 }
 
                 else {
+                    connections.put(Objects.requireNonNull(AuthDAO.getAuth(tempCommand.getAuthString())).username(), session);
                     session.getRemote().sendString(new Gson().toJson(new LoadGame(joinPlayer.getPlayerColor())));
-                    for (Session session1 : currentSessions) {
-                        if (session1 != session) {
-                            session1.getRemote().sendString(new Gson().toJson(new Notification("Player Joined in Game as: " + joinPlayer.getPlayerColor())));
+                    for (var session1 : connections.values()) {
+                        if (session1.isOpen()) {
+                            if (session1 != session) {
+                                session1.getRemote().sendString(new Gson().toJson(new Notification("Player Joined in Game as: " + joinPlayer.getPlayerColor())));
+                            }
                         }
                     }
                 }
                 break;
             case JOIN_OBSERVER:
-                currentSessions.add(session);
+
+
                 if (GameDAO.getGame(tempCommand.getGameID()) == null) {
                     session.getRemote().sendString(new Gson().toJson(new Error("Bad Game ID")));
                 }
                 else if (AuthDAO.getAuth(tempCommand.getAuthString()) == null) {
                     session.getRemote().sendString(new Gson().toJson(new Error("Bad auth")));
                 } else {
+                    connections.put(Objects.requireNonNull(AuthDAO.getAuth(tempCommand.getAuthString())).username(), session);
                     session.getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
 
-                    for (Session session1 : currentSessions) {
-                        if (session1 != session) {
-                            session1.getRemote().sendString(new Gson().toJson(new Notification("Player Joined in Game as: observer")));
+                    for (var session1 : connections.values()) {
+                        if (session1.isOpen()) {
+                            if (session1 != session) {
+                                System.out.println(session.isOpen());
+                                session1.getRemote().sendString(new Gson().toJson(new Notification("Player Joined in Game as: observer")));
+                            }
                         }
                     }
                 }
