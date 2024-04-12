@@ -154,6 +154,11 @@ public class ChessGame {
     public void endGame() {
         gameOver = true;
     }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
     /**
      * Swaps the team whose turn it is
      */
