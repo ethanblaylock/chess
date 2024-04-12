@@ -3,8 +3,6 @@ package ServerFacade;
 import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
-import dataAccess.GameDAO;
 import model.GameData;
 import request.CreateGameRequest;
 import request.JoinGameRequest;
@@ -22,6 +20,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import static ui.MakeBoard.makeChessBoard;
@@ -122,7 +121,7 @@ public class ServerFacade {
         }
     }
 
-    public void listGames(String authToken) throws Exception{
+    public ListGamesResult listGames(String authToken) throws Exception{
         URI uri = new URI("http://localhost:8000/game");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setReadTimeout(5000);
@@ -156,6 +155,7 @@ public class ServerFacade {
         } catch (Exception e) {
             System.out.println("haha caught");
         }
+        return null;
     }
 
     public void joinGame(int gameID, ChessGame.TeamColor teamColor, String authToken, String username) throws Exception {
@@ -239,30 +239,28 @@ public class ServerFacade {
     }
 
     public void makeMove(ChessMove move) throws Exception {
-        GameData currentGame = GameDAO.getGame(currentGameID);
-        assert currentGame != null;
-        ChessGame game = currentGame.game();
-        game.makeMove(move);
-        GameDAO.updateGame(new GameData(currentGameID, currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
         ws.send(new Gson().toJson(new MakeMove(authToken, currentGameID, move)));
     }
 
     public void resign() throws Exception {
-        GameData currentGame = GameDAO.getGame(currentGameID);
-        assert currentGame != null;
-        ChessGame game = currentGame.game();
-        game.endGame();
-        GameDAO.updateGame(new GameData(currentGameID, currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
         ws.send(new Gson().toJson(new Resign(authToken, currentGameID)));
     }
-    public static void redrawBoard() throws DataAccessException {
+    public void redrawBoard() throws Exception {
         ChessGame.TeamColor color;
         if (teamColor == ChessGame.TeamColor.BLACK) {
             color = ChessGame.TeamColor.BLACK;
         } else {
             color = ChessGame.TeamColor.WHITE;
         }
-        makeChessBoard(Objects.requireNonNull(GameDAO.getGame(currentGameID)).game().getBoard(), color);
+        GameData currentGame = null;
+        ListGamesResult games = listGames(authToken);
+        for (GameData gameData : games.games()) {
+            if (gameData.gameID() == currentGameID) {
+                currentGame = gameData;
+            }
+        }
+        assert currentGame != null;
+        makeChessBoard(currentGame.game().getBoard(), color);
     }
 
 }

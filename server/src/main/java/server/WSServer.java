@@ -5,6 +5,7 @@ import chess.ChessMove;
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.*;
 
@@ -19,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @WebSocket
 public class WSServer {
     public final ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
-
-
+    GameData currentGame;
+    ChessGame game;
     public WSServer() {}
 
     @OnWebSocketClose
@@ -49,15 +50,27 @@ public class WSServer {
                 }
                 break;
             case RESIGN:
+                Resign res = new Gson().fromJson(message, Resign.class);
+                currentGame = GameDAO.getGame(res.getGameID());
+                assert currentGame != null;
+                game = currentGame.game();
+                game.endGame();
+                GameDAO.updateGame(new GameData(res.getGameID(), currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
+
                 for (Session session1 :  connections.values()) {
                     session1.getRemote().sendString(new Gson().toJson(new Notification(Objects.requireNonNull(AuthDAO.getAuth(tempCommand.getAuthString())).username() + " has resigned the game")));
                 }
                 break;
             case MAKE_MOVE:
+                MakeMove makeMove = new Gson().fromJson(message, MakeMove.class);
                 boolean noError = true;
-                ChessMove move = new Gson().fromJson(message, MakeMove.class).getMove();
                 try {
-                    Objects.requireNonNull(GameDAO.getGame(1)).game().makeMove(move);
+                    currentGame = GameDAO.getGame(makeMove.getGameID());
+                    assert currentGame != null;
+                    game = currentGame.game();
+                    game.makeMove(makeMove.getMove());
+                    GameDAO.updateGame(new GameData(makeMove.getGameID(), currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
+                    Objects.requireNonNull(GameDAO.getGame(makeMove.getGameID())).game().makeMove(makeMove.getMove());
                 } catch (Exception e) {
                     noError = false;
                     session.getRemote().sendString(new Gson().toJson(new Error(e.getMessage())));
@@ -67,7 +80,7 @@ public class WSServer {
                         session1.getRemote().sendString(new Gson().toJson(new LoadGame(ChessGame.TeamColor.WHITE)));
                         if (session1.isOpen()) {
                             if (session1 != session) {
-                                session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " made the move: " + move)));
+                                session1.getRemote().sendString(new Gson().toJson(new Notification(AuthDAO.getAuth(tempCommand.getAuthString()).username() + " made the move: " + makeMove.getMove())));
                             }
                         }
                     }

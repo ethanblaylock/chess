@@ -32,7 +32,7 @@ public class WSFacade extends Endpoint {
                     case LOAD_GAME:
                         try {
                             ServerFacade.redrawBoard();
-                        } catch (DataAccessException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                         break;
