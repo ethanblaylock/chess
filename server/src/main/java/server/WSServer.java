@@ -17,6 +17,9 @@ import webSocketMessages.userCommands.*;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static chess.ChessGame.TeamColor.BLACK;
+import static chess.ChessGame.TeamColor.WHITE;
+
 @WebSocket
 public class WSServer {
     public final ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
@@ -44,6 +47,16 @@ public class WSServer {
         UserGameCommand tempCommand = new Gson().fromJson(message, UserGameCommand.class);
         switch(tempCommand.getCommandType()) {
             case LEAVE:
+                Leave leave = new Gson().fromJson(message, Leave.class);
+                currentGame = GameDAO.getGame(leave.getGameID());
+                assert currentGame != null;
+                if (Objects.equals(currentGame.whiteUsername(), Objects.requireNonNull(AuthDAO.getAuth(leave.getAuthString())).username())) {
+                    assert currentGame != null;
+                    GameDAO.updateGame(new GameData(leave.getGameID(), null, currentGame.blackUsername(), currentGame.gameName(), currentGame.game()));
+                } else if (Objects.equals(currentGame.blackUsername(), Objects.requireNonNull(AuthDAO.getAuth(leave.getAuthString())).username())) {
+                    assert currentGame != null;
+                    GameDAO.updateGame(new GameData(leave.getGameID(), currentGame.whiteUsername(), null, currentGame.gameName(), currentGame.game()));
+                }
                 connections.remove(Objects.requireNonNull(AuthDAO.getAuth(tempCommand.getAuthString())).username());
                 for (Session session1 : connections.values()) {
                     session1.getRemote().sendString(new Gson().toJson(new Notification("Player left game: " + Objects.requireNonNull(AuthDAO.getAuth(tempCommand.getAuthString())).username())));

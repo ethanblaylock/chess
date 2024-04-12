@@ -1,7 +1,6 @@
 package ServerFacade;
 
 import com.google.gson.Gson;
-import dataAccess.DataAccessException;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 
@@ -16,6 +15,7 @@ public class WSFacade extends Endpoint {
     public WSFacade() throws Exception {
         URI uri = new URI("ws://localhost:8000/connect");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        ServerFacade serverFacade = new ServerFacade();
         this.session = container.connectToServer(this, uri);
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
@@ -31,7 +31,7 @@ public class WSFacade extends Endpoint {
                         break;
                     case LOAD_GAME:
                         try {
-                            ServerFacade.redrawBoard();
+                            serverFacade.redrawBoard();
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }

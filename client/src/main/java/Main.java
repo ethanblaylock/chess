@@ -1,6 +1,5 @@
 import ServerFacade.ServerFacade;
 import chess.*;
-import dataAccess.GameDAO;
 import model.GameData;
 import ui.EscapeSequences;
 
@@ -175,17 +174,9 @@ public class Main {
                             System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             break;
                         case "redraw":
-                            ServerFacade.redrawBoard();
+                            serverFacade.redrawBoard();
                             break;
                         case "leave":
-                            GameData currentGame = GameDAO.getGame(gameID);
-                            if (teamColor == WHITE) {
-                                assert currentGame != null;
-                                GameDAO.updateGame(new GameData(gameID, null, currentGame.blackUsername(), currentGame.gameName(), currentGame.game()));
-                            } else if (teamColor == BLACK) {
-                                assert currentGame != null;
-                                GameDAO.updateGame(new GameData(gameID, currentGame.whiteUsername(), null, currentGame.gameName(), currentGame.game()));
-                            }
                             serverFacade.leave();
                             currentState = "[LOGGED IN] >>> ";
                             break;
