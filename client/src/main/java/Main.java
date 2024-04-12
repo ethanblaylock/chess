@@ -10,7 +10,7 @@ import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         ServerFacade serverFacade = new ServerFacade();
         System.out.println("♕ 240 Chess Client. Type Help to get started. ♕ \n" );
         String currentState = "[LOGGED OUT] >>> ";
@@ -175,13 +175,15 @@ public class Main {
                             System.out.print(EscapeSequences.RESET_TEXT_COLOR);
                             break;
                         case "redraw":
-                            serverFacade.redrawBoard();
+                            ServerFacade.redrawBoard();
                             break;
                         case "leave":
                             GameData currentGame = GameDAO.getGame(gameID);
                             if (teamColor == WHITE) {
+                                assert currentGame != null;
                                 GameDAO.updateGame(new GameData(gameID, null, currentGame.blackUsername(), currentGame.gameName(), currentGame.game()));
                             } else if (teamColor == BLACK) {
+                                assert currentGame != null;
                                 GameDAO.updateGame(new GameData(gameID, currentGame.whiteUsername(), null, currentGame.gameName(), currentGame.game()));
                             }
                             serverFacade.leave();

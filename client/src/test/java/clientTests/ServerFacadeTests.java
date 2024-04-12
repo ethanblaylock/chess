@@ -10,7 +10,7 @@ import service.ClearService;
 public class ServerFacadeTests {
 
     private static Server server;
-
+    ServerFacade serverFacade = new ServerFacade();
     @BeforeAll
     public static void init() {
         server = new Server();
@@ -32,76 +32,76 @@ public class ServerFacadeTests {
 
     @Test
     public void loginTestPositive() throws Exception {
-        ServerFacade.register("bob", "ross", "email");
-        Assertions.assertNotNull(ServerFacade.login("bob", "ross"));
+        serverFacade.register("bob", "ross", "email");
+        Assertions.assertNotNull(serverFacade.login("bob", "ross"));
     }
 
     @Test
     public void loginTestNegative() throws Exception {
-        Assertions.assertNull(ServerFacade.login("bobb", "ross"));
+        Assertions.assertNull(serverFacade.login("bobb", "ross"));
     }
 
     @Test
     public void logoutTestPositive() throws Exception {
-        ServerFacade.logout(ServerFacade.login("bob", "ross"));
+        serverFacade.logout(serverFacade.login("bob", "ross"));
         Assertions.assertTrue(true);
     }
 
     @Test
     public void logoutTestNegative() throws Exception {
-        ServerFacade.logout("");
+        serverFacade.logout("");
         Assertions.assertTrue(true);
     }
 
     @Test
     public void registerTestPositive() throws Exception {
-        Assertions.assertNotNull(ServerFacade.register("bob", "ross", "email"));
+        Assertions.assertNotNull(serverFacade.register("bob", "ross", "email"));
     }
 
     @Test
     public void registerTestNegative() throws Exception {
-        ServerFacade.register("bob", "ross", "email");
-        Assertions.assertNull(ServerFacade.register("bob", "ross", "email"));
+        serverFacade.register("bob", "ross", "email");
+        Assertions.assertNull(serverFacade.register("bob", "ross", "email"));
     }
 
     @Test
     public void createGameTestPositive() throws Exception {
-        ServerFacade.createGame("name", "");
+        serverFacade.createGame("name", "");
         Assertions.assertTrue(true);
     }
 
     @Test
     public void createGameTestNegative() throws Exception {
-        ServerFacade.createGame("name", ServerFacade.register("user", "pass", "email"));
+        serverFacade.createGame("name", serverFacade.register("user", "pass", "email"));
         Assertions.assertTrue(true);
     }
 
     @Test
     public void listGamesTestPositive() throws Exception {
-        ServerFacade.listGames(ServerFacade.register("user", "pass", "email"));
+        serverFacade.listGames(serverFacade.register("user", "pass", "email"));
         Assertions.assertTrue(true);
     }
 
     @Test
     public void listGamesTestNegative() throws Exception {
-        ServerFacade.listGames("");
+        serverFacade.listGames("");
         Assertions.assertTrue(true);
     }
 
     @Test
     public void joinGameTestPositive() throws Exception {
-        String authToken = ServerFacade.register("user", "pass", "email");
-        ServerFacade.createGame("game", authToken);
-        ServerFacade.joinGame(1, ChessGame.TeamColor.WHITE, authToken);
+        String authToken = serverFacade.register("user", "pass", "email");
+        serverFacade.createGame("game", authToken);
+        serverFacade.joinGame(1, ChessGame.TeamColor.WHITE, authToken, "user");
         Assertions.assertTrue(true);
     }
 
     @Test
     public void joinGameTestNegative() throws Exception {
-        String authToken = ServerFacade.register("user", "pass", "email");
-        ServerFacade.createGame("game", authToken);
-        ServerFacade.joinGame(1, ChessGame.TeamColor.WHITE, authToken);
-        ServerFacade.joinGame(1, ChessGame.TeamColor.WHITE, authToken);
+        String authToken = serverFacade.register("user", "pass", "email");
+        serverFacade.createGame("game", authToken);
+        serverFacade.joinGame(1, ChessGame.TeamColor.WHITE, authToken, "user");
+        serverFacade.joinGame(1, ChessGame.TeamColor.WHITE, authToken, "user");
         Assertions.assertTrue(true);
     }
 

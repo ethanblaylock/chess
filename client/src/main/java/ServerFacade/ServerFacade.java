@@ -1,6 +1,5 @@
 package ServerFacade;
 
-import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
@@ -16,13 +15,9 @@ import result.ListGamesResult;
 import result.RegisterResult;
 import spark.utils.IOUtils;
 import ui.EscapeSequences;
-import webSocketMessages.serverMessages.LoadGame;
-import webSocketMessages.serverMessages.Notification;
-import webSocketMessages.serverMessages.ServerMessage;
+
 import webSocketMessages.userCommands.*;
 
-import javax.websocket.*;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -51,15 +46,12 @@ public class ServerFacade {
             var jsonBody = new Gson().toJson(new LoginRequest(username, password));
             outputStream.write(jsonBody.getBytes());
         }
+        return getString(http);
+    }
+
+    private String getString(HttpURLConnection http) {
         try {
             if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // Get HTTP response headers, if necessary
-                // Map<String, List<String>> headers = connection.getHeaderFields();
-
-                // OR
-
-                //connection.getHeaderField("Content-Length");
-
                 InputStream responseBody = http.getInputStream();
                 String jsonText = IOUtils.toString(responseBody);
                 authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
@@ -89,30 +81,7 @@ public class ServerFacade {
             var jsonBody = new Gson().toJson(new RegisterRequest(username, password, email));
             outputStream.write(jsonBody.getBytes());
         }
-        try {
-            if (http2.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // Get HTTP response headers, if necessary
-                // Map<String, List<String>> headers = connection.getHeaderFields();
-
-                // OR
-
-                //connection.getHeaderField("Content-Length");
-
-                InputStream responseBody = http2.getInputStream();
-                String jsonText = IOUtils.toString(responseBody);
-                authToken = new Gson().fromJson(jsonText, RegisterResult.class).authToken();
-                return authToken;
-                // Read response body from InputStream ...
-            } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println(http2.getResponseCode());
-                System.out.println(http2.getResponseMessage());
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-            }
-        } catch (Exception e) {
-            System.out.println("haha caught");
-        }
-        return null;
+        return getString(http2);
     }
 
     public void createGame(String gameName, String authToken) throws Exception{
@@ -235,31 +204,6 @@ public class ServerFacade {
         }
     }
 
-    public Collection<GameData> getGames(String authToken) throws Exception {
-        URI uri = new URI("http://localhost:8000/game");
-        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
-        http.setReadTimeout(5000);
-        http.setRequestMethod("GET");
-        http.setDoOutput(true);
-        // Make the request
-        http.addRequestProperty("Authorization", authToken);
-        http.connect();
-
-        try {
-            if (http.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // Get HTTP response headers, if necessary
-                // Map<String, List<String>> headers = connection.getHeaderFields();
-
-                InputStream responseBody = http.getInputStream();
-                String jsonText = IOUtils.toString(responseBody);
-                return new Gson().fromJson(jsonText, ListGamesResult.class).games();
-            }
-        } catch (Exception e) {
-            System.out.println("haha caught");
-        }
-        return null;
-    }
-
     public void logout(String authToken) throws Exception{
         URI uri = new URI("http://localhost:8000/session");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
@@ -278,9 +222,6 @@ public class ServerFacade {
                 // OR
 
                 //connection.getHeaderField("Content-Length");
-
-                InputStream responseBody = http.getInputStream();
-                String jsonText = IOUtils.toString(responseBody);
                 // Read response body from InputStream ...
             } else {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
@@ -299,6 +240,7 @@ public class ServerFacade {
 
     public void makeMove(ChessMove move) throws Exception {
         GameData currentGame = GameDAO.getGame(currentGameID);
+        assert currentGame != null;
         ChessGame game = currentGame.game();
         game.makeMove(move);
         GameDAO.updateGame(new GameData(currentGameID, currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
@@ -307,6 +249,7 @@ public class ServerFacade {
 
     public void resign() throws Exception {
         GameData currentGame = GameDAO.getGame(currentGameID);
+        assert currentGame != null;
         ChessGame game = currentGame.game();
         game.endGame();
         GameDAO.updateGame(new GameData(currentGameID, currentGame.whiteUsername(), currentGame.blackUsername(), currentGame.gameName(), game));
@@ -319,7 +262,7 @@ public class ServerFacade {
         } else {
             color = ChessGame.TeamColor.WHITE;
         }
-        makeChessBoard(GameDAO.getGame(currentGameID).game().getBoard(), color);
+        makeChessBoard(Objects.requireNonNull(GameDAO.getGame(currentGameID)).game().getBoard(), color);
     }
 
 }
